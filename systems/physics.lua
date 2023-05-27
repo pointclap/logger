@@ -9,13 +9,13 @@ function init_physics()
 end
 
 
-local cur_time = 0
-local next_update = 0
-function update_physics(dt)
-    cur_time = cur_time + dt
 
-    if cur_time > next_update then
-        next_update = cur_time + 0.008
+local accumulated_deltatime = 0
+function update_physics(dt)
+    accumulated_deltatime = accumulated_deltatime + dt
+
+    while accumulated_deltatime > 0.008 do
+        accumulated_deltatime = accumulated_deltatime - 0.008
         for _, player in pairs(players) do
             if player.body ~= nil then
                 if player.velocity ~= nil then
