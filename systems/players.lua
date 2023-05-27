@@ -104,16 +104,8 @@ function player_movement(dt)
 	end
 end
 
-local cur_time = 0
-local next_update = nil
 function send_updated_position(dt)
-    cur_time = cur_time + dt
-    if next_update == nil then
-        next_update = cur_time
-    end
-
-    if localplayer and cur_time > next_update then
-        next_update = cur_time + 0.016
+    if localplayer then
         connection:send({
             cmd = "update-position",
             id = localplayer,
@@ -134,17 +126,16 @@ function render_player_model()
         if player.model then
             love.graphics.circle("fill", player.model.x, player.model.y, player.model.radius)
             
-            if player.username then
-                local text = love.graphics.newText(font, {{colour.r, colour.g, colour.b}, player.username})
+            if player.username and player.uniqueid then
+                local fontSize = 2
+                local text = love.graphics.newText(font, {{colour.r, colour.g, colour.b}, player.username .. "#" .. player.uniqueid})
                 love.graphics.push()
-                love.graphics.scale(2)
+                love.graphics.scale(fontSize)
                 local textWidth, textHeight = text:getDimensions()
                 love.graphics.draw(text,
-                                   player.model.x / 2 - (textWidth / 2), 
-                                   ((player.model.y - 20) / 2) - (textHeight / 2))
+                                   player.model.x / fontSize - (textWidth / 2), 
+                                   ((player.model.y - 20) / fontSize) - (textHeight / 2))
                 love.graphics.pop()
-                --love.graphics.scale(0.5)
-
             end
         end
 

@@ -6,6 +6,9 @@ require("systems.physics")
 players = {}
 username = nil
 connection = nil
+tick_rate = 1 / 64
+cur_time = 0
+next_update = 0
  
 local function load(args)
 	username = args[2]
@@ -15,6 +18,8 @@ local function load(args)
 end
 
 local function update(dt)
+	cur_time = cur_time + dat
+
 	if connection then
 		for _, event in pairs(connection:events()) do
 			if event.type == "receive" then
@@ -37,7 +42,11 @@ local function update(dt)
 	apply_drag(dt)
 	update_physics(dt)
 	interpolate_player_location(dt)
-	send_updated_position(dt)
+
+	if cur_time > next_update then
+		next_update = curtime + tick_rate
+		send_updated_position(dt)
+	end
 end
 
 local function quit()

@@ -6,10 +6,10 @@ function love.load(args)
     if not args[1] then
         is_server = true
         server.load(args)
-        client.load({
-            "localhost",
-            "local-user"
-        })
+        -- client.load({
+        --     "localhost",
+        --     "local-user"
+        -- })
     else
         client.load(args)
     end
@@ -18,15 +18,22 @@ end
 function love.update(dt)
     if is_server then
         server.update(dt)
-    end
-
-    client.update(dt)
+    else
+        client.update(dt)
+    end    
 end
 
 function love.draw()
-    client.draw()
+    if is_server then
+        -- list players + other stats
+    else
+        client.draw()
+    end
+
 end
 
 function love.quit()
-    client.quit()
+    if not is_server then
+        client.quit()
+    end
 end
