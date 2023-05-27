@@ -4,7 +4,7 @@ subscribe_message("new-player", function(msg)
     if msg.username == username and localplayer == nil then
         localplayer = tonumber(msg.id)
     else
-        print("New player \"" .. msg.username .. "\" joined!")
+        print("New player " .. msg.username .. "#" .. msg.uniqueid .. " joined!")
     end
 
     players[tonumber(msg.id)] = {
@@ -19,7 +19,7 @@ end)
 
 subscribe_message("player-left", function(msg)
     players[tonumber(msg.id)] = nil
-    print("Player \"" .. msg.username .. "\" left!")
+    print("Player " .. msg.username .. "#" .. msg.uniqueid .. " left!")
 end)
 
 subscribe_message("update-position", function(msg)

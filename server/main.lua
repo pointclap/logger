@@ -35,13 +35,15 @@ function ServerListen()
             print(hostevent.peer, "connected.")
 
 		elseif hostevent.type == "disconnect" then
-			enethost:broadcast(encode_message({
-				cmd = "player-left",
-				username = players[hostevent.peer:index()].username,
-				id = hostevent.peer:index()
-			}))
+			if players[hostevent.peer:index()] ~= nil then
+				enethost:broadcast(encode_message({
+					cmd = "player-left",
+					username = players[hostevent.peer:index()].username,
+					id = hostevent.peer:index()
+				}))
 
-			players[hostevent.peer:index()] = nil
+				players[hostevent.peer:index()] = nil
+			end			
 
 		elseif hostevent.type == "receive" then
             print("Received message: ", hostevent.data, hostevent.peer)
@@ -70,6 +72,7 @@ function ServerListen()
 
 					if uniqueidused == 0 then
 						players[hostevent.peer:index()].uniqueid = newuniqueid
+						print(players[hostevent.peer:index()].username .."#" .. newuniqueid .. " joined")
 						break
 					end
 				end
