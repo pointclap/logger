@@ -41,8 +41,6 @@ local function update(dt)
 		end
 	end
 
-	player_movement(dt)
-	apply_drag(dt)
 	update_physics(dt)
 	interpolate_player_location(dt)
 
