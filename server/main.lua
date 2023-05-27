@@ -56,7 +56,7 @@ function ServerListen()
 
 			if tbl["cmd"] == "new-player" then
 				players[hostevent.peer:index()] = tbl["username"]
-
+				
 				for id, username in pairs(players) do
 					hostevent.peer:send(encode_message({
 						cmd = "new-player",
@@ -70,6 +70,14 @@ function ServerListen()
 					username = tbl["username"],
 					id = hostevent.peer:index()
 				}))
+			elseif tbl["cmd"] == "player-left" then
+				enethost:broadcast(encode_message({
+					cmd = "player-left",
+					username = players[hostevent.peer:index()],
+					id = hostevent.peer:index()
+				}))
+	
+				players[hostevent.peer:index()] = nil
 			else
 				enethost:broadcast(hostevent.data)
 			end

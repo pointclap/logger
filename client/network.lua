@@ -37,6 +37,11 @@ function connection:send(data)
     self.peer:send(encoded)
 end
 
+function connection:close()
+    self.client:flush()
+    self.client:destroy()
+end
+
 function connect(ip_address)
     local client = enet.host_create()
     local peer = client:connect(ip_address .. ":27031")

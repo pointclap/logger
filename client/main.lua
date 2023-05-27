@@ -7,6 +7,13 @@ localplayer = nil
 players = {}
 
 event_handlers = {}
+
+next_update = 1.0
+cur_time = 0.0
+
+local font = love.graphics.newFont(7, "mono")
+font:setFilter("nearest")
+love.graphics.setFont(font)
  
 function register_handler(name, func)
 	if event_handlers[name] == nil then
@@ -41,31 +48,48 @@ function handle_new_player(msg)
  
 	players[tonumber(msg["id"])] = {
 		x = 0,
-		y = 0
+		y = 0,
+        mouseX = 0,
+        mouseY = 0,
+        username = username
 	}
+end
+
+function handle_player_left(msg)
+	local player_id = tonumber(msg["id"])
+
+	if players[player_id] then
+		players[player_id] = nil
+	end
 end
 
 function love.load(args)
 	register_handler("new-player", handle_new_player)
 	register_handler("update-position", handle_update_position)
+    register_handler("update-mouse", handle_mouse_position)
+	register_handler("player-left", handle_player_left)
  
 	username = args[2]
 	connection = connect(args[1]);
 end
 
-next_update = 1.0
-cur_time = 0.0
 function love.update(dt)
 	cur_time = cur_time + dt
 	-- Update current player location to mouse position
 	if localplayer and cur_time > next_update then
-		next_update = cur_time + 0.01
+		next_update = cur_time + (1.0 / 128)
+
 		--local x, y = love.mouse.getPosition()
 		local x = players[localplayer].x
 		local y = players[localplayer].y
  
+        local mouseX = players[localplayer].mouseX
+        local mouseY = players[localplayer].mouseY
+
 		if love.window.hasMouseFocus() then
+			local mouseX, mouseY = love.mouse.getPosition()
 			local ms = 1000.0 * dt
+
 			if love.keyboard.isDown("d") then
 				x = x + ms
 			elseif love.keyboard.isDown("a") then
@@ -90,6 +114,18 @@ function love.update(dt)
 			players[localplayer].x = x
 			players[localplayer].y = y
 		end
+		
+        if players[localplayer].mouseX ~= mouseX or players[localplayer].mouseY ~= mouseY then
+            connection:send({
+                cmd = "update-mouse",
+                id = localplayer,
+                mouseX = mouseX,
+                mouseY = mouseY
+            })
+
+            players[localplayer].mouseX = mouseX
+            players[localplayer].mouseY = mouseY
+        end
 	end
  
 	for _, event in pairs(connection:events()) do
@@ -109,6 +145,15 @@ function love.update(dt)
 	end
 end
 
+function love.quit()
+	connection:send({
+		cmd = "player-left",
+		id = localplayer,
+		username = username
+	})
+	connection:close()
+end
+
 function love.draw()
 	local color_index = 1
 	local width, height = love.graphics.getDimensions()
@@ -119,6 +164,12 @@ function love.draw()
  
 	for id, player in pairs(players) do
 		local colour = hsv2rgb(30 * (id - 1), 100, 100)
+		local smallColour = {
+			colour.r / 255.0,
+			colour.g / 255.0,
+			colour.b / 255.0
+		}
+
 		love.graphics.setColor(
 			colour.r,
 			colour.g,
@@ -126,6 +177,15 @@ function love.draw()
 		)
 
 		love.graphics.circle("fill", player.x, player.y, 10)
+
+		if player.username then
+			local text = love.graphics.newText(font, {smallColour, player.username})
+			love.graphics.scale(2)
+			local textWidth, textHeight = text:getDimensions()
+			love.graphics.draw(text, player.x - textWidth / 2, player.y - 10 - textHeight / 2)
+			love.graphics.scale(0.5)
+		end
+
 		color_index = color_index + 1
 	end
 end
