@@ -15,8 +15,7 @@ function register_handler(name, func)
  
 	table.insert(event_handlers[name], func)
 end
- 
--- cmd=new-player;username=mathias;id=10
+
 function incoming_message(msg)
 	tbl = {}
 	for k, v in msg:gmatch("([^=]+)=([^;]+);") do
@@ -40,7 +39,7 @@ function outgoing_message(msg)
 end
  
 function handle_update_position(msg)
-	if msg["id"] ~= localplayer then
+	if tonumber(msg["id"]) ~= localplayer then
 		local player_id = tonumber(msg["id"])
 		players[player_id].x = tonumber(msg["x"])
 		players[player_id].y = tonumber(msg["y"])
@@ -86,16 +85,17 @@ function love.update(dt)
 		local y = players[localplayer].y
  
 		if love.window.hasMouseFocus() then
+			local ms = 1000.0 * dt
 			if love.keyboard.isDown("d") then
-				x = x + 1
+				x = x + ms
 			elseif love.keyboard.isDown("a") then
-				x = x - 1
+				x = x - ms
 			end
  
 			if love.keyboard.isDown("s") then
-				y = y + 1
+				y = y + ms
 			elseif love.keyboard.isDown("w") then
-				y = y - 1
+				y = y - ms
 			end
 		end
  
@@ -135,6 +135,10 @@ end
 function love.draw()
 	local color_index = 1
 	local width, height = love.graphics.getDimensions()
+
+	if localplayer then
+		love.graphics.translate(-players[localplayer].x + width / 2, -players[localplayer].y + height / 2)
+	end
  
 	for id, player in pairs(players) do
 		local colour = hsv2rgb(30 * (id - 1), 100, 100)
@@ -143,16 +147,8 @@ function love.draw()
 			colour.g,
 			colour.b
 		)
- 
-		local x = width / 2
-		local y = height / 2
- 
-		if id ~= localplayer then
-			x = x + player.x
-			y = y + player.y
-		end
- 
-		love.graphics.circle("fill", x, y, 10)
+
+		love.graphics.circle("fill", player.x, player.y, 10)
 		color_index = color_index + 1
 	end
 end
