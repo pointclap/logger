@@ -116,13 +116,13 @@ function love.draw()
 
 		love.graphics.circle("fill", player.x, player.y, 10)
 
-		if player.username then
-			local text = love.graphics.newText(font, {colour, player.username})
-			love.graphics.scale(2)
-			local textWidth, textHeight = text:getDimensions()
-			love.graphics.draw(text, player.x - textWidth / 2, player.y - 10 - textHeight / 2)
-			love.graphics.scale(0.5)
-		end
+		-- if player.username then
+		-- 	local text = love.graphics.newText(font, {colour, player.username})
+		-- 	love.graphics.scale(2)
+		-- 	local textWidth, textHeight = text:getDimensions()
+		-- 	love.graphics.draw(text, player.x - textWidth / 2, player.y - 10 - textHeight / 2)
+		-- 	love.graphics.scale(0.5)
+		-- end
 
 		color_index = color_index + 1
 	end

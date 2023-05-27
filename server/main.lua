@@ -37,7 +37,7 @@ function ServerListen()
 		elseif hostevent.type == "disconnect" then
 			enethost:broadcast(encode_message({
 				cmd = "player-left",
-				username = players[hostevent.peer:index()],
+				username = players[hostevent.peer:index()].username,
 				id = hostevent.peer:index()
 			}))
 
@@ -52,25 +52,49 @@ function ServerListen()
 			end
 
 			if tbl.cmd == "new-player" then
-				for id, username in pairs(players) do
+				-- generate random 4 digit number to uniqueify each username
+				players[hostevent.peer:index()] = {
+					username = tbl.username
+				}
+
+				while true do
+					local uniqueidused = 0
+					local newuniqueid = math.random(1, 9999)
+
+					for id, ply in pairs(players) do
+						if ply.username == tbl.username and ply.uniqueid == newuniqueid then
+							uniqueidused = 1
+							break
+						end
+					end
+
+					if uniqueidused == 0 then
+						players[hostevent.peer:index()].uniqueid = newuniqueid
+						break
+					end
+				end
+
+				-- Tell the new player about all other players
+				for id, ply in pairs(players) do
 					hostevent.peer:send(encode_message({
 						cmd = "new-player",
-						username = username,
+						username = ply.username,
+						uniqueid = ply.uniqueid,
 						id = id
 					}))
 				end
-
-				players[hostevent.peer:index()] = tbl.username
-
+				
+				-- Tell all players about the new player
 				enethost:broadcast(encode_message({
 					cmd = "new-player",
-					username = tbl.username,
+					username = players[hostevent.peer:index()].username,
+					uniqueid = players[hostevent.peer:index()].uniqueid,
 					id = hostevent.peer:index()
 				}))
 			elseif tbl.cmd == "player-left" then
 				enethost:broadcast(encode_message({
 					cmd = "player-left",
-					username = players[hostevent.peer:index()],
+					username = players[hostevent.peer:index()].username,
 					id = hostevent.peer:index()
 				}))
 	
