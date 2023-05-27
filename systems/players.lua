@@ -1,4 +1,5 @@
 localplayer = nil
+local width, height = love.graphics.getDimensions()
 
 local font = love.graphics.newFont(7, "mono")
 font:setFilter("nearest")
@@ -163,7 +164,10 @@ local function render_player(player)
     if player.model then
         love.graphics.circle("fill", player.model.x, player.model.y, player.model.radius)
         if player.mouseX and player.mouseY then
+            love.graphics.push()
+            love.graphics.translate(players[localplayer].model.x - width / 2, players[localplayer].model.y - height / 2)
             love.graphics.circle("fill", player.mouseX, player.mouseY, 3)
+            love.graphics.pop()
         end
 
         if player.username and player.uniqueid then
@@ -181,7 +185,6 @@ end
 
 function render()
     love.graphics.push()
-    local width, height = love.graphics.getDimensions()
 
     if localplayer and players[localplayer] then
 		love.graphics.translate(-players[localplayer].model.x + width / 2, -players[localplayer].model.y + height / 2)
