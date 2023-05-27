@@ -1,16 +1,13 @@
 enet = require "enet"
 
 enethost = nil
-hostevent = nil
 
 players = {}
 
 function love.load(args)
 	love.window.close()
-    local listen_address = "*:27031"
-    print("listening on " .. listen_address)
-    -- establish host for receiving msg
-    enethost = enet.host_create(listen_address)
+    enethost = enet.host_create("*:27031")
+	print("listening..")
 end
 
 function love.update(dt)
@@ -31,7 +28,7 @@ function encode_message(msg)
 end
 
 function ServerListen()
-    hostevent = enethost:service()
+    local hostevent = enethost:service()
     if hostevent then
         print("Server detected message type: " .. hostevent.type)
         if hostevent.type == "connect" then
@@ -54,9 +51,7 @@ function ServerListen()
 				tbl[k] = v
 			end
 
-			if tbl["cmd"] == "new-player" then
-				players[hostevent.peer:index()] = tbl["username"]
-
+			if tbl.cmd == "new-player" then
 				for id, username in pairs(players) do
 					hostevent.peer:send(encode_message({
 						cmd = "new-player",
@@ -65,26 +60,25 @@ function ServerListen()
 					}))
 				end
 
+				players[hostevent.peer:index()] = tbl.username
+
 				enethost:broadcast(encode_message({
 					cmd = "new-player",
-					username = tbl["username"],
+					username = tbl.username,
 					id = hostevent.peer:index()
 				}))
+			elseif tbl.cmd == "player-left" then
+				print("test")
+				enethost:broadcast(encode_message({
+					cmd = "player-left",
+					username = players[hostevent.peer:index()],
+					id = hostevent.peer:index()
+				}))
+	
+				players[hostevent.peer:index()] = nil
 			else
 				enethost:broadcast(hostevent.data)
 			end
         end
     end
-end
-
-function print_table(tbl) 
-	for k, v in pairs(tbl) do
-		if type(v) == "table" then
-			print(k .. " = { ")
-			print_table(v)
-			print(" }, ")
-		else 
-			print(k .. " = " .. v .. ", ")
-		end
-	end
 end
