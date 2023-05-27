@@ -30,7 +30,7 @@ end
 function ServerListen()
     local hostevent = enethost:service()
     if hostevent then
-        print("Server detected message type: " .. hostevent.type)
+        --print("Server detected message type: " .. hostevent.type)
         if hostevent.type == "connect" then
             print(hostevent.peer, "connected.")
 
@@ -39,6 +39,7 @@ function ServerListen()
 				enethost:broadcast(encode_message({
 					cmd = "player-left",
 					username = players[hostevent.peer:index()].username,
+					uniqueid = players[hostevent.peer:index()].uniqueid,
 					id = hostevent.peer:index()
 				}))
 
@@ -46,7 +47,7 @@ function ServerListen()
 			end			
 
 		elseif hostevent.type == "receive" then
-            print("Received message: ", hostevent.data, hostevent.peer)
+            --print("Received message: ", hostevent.data, hostevent.peer)
 
 			tbl = {}
 			for k, v in hostevent.data:gmatch("([^=]+)=([^;]+);") do
@@ -77,14 +78,26 @@ function ServerListen()
 					end
 				end
 
+				hostevent.peer:send(encode_message({
+					cmd = "new-player",
+					id = hostevent.peer:index(),
+					username = players[hostevent.peer:index()].username,
+					uniqueid = players[hostevent.peer:index()].uniqueid
+				}))
+
 				-- Tell the new player about all other players
 				for id, ply in pairs(players) do
-					hostevent.peer:send(encode_message({
-						cmd = "new-player",
-						username = ply.username,
-						uniqueid = ply.uniqueid,
-						id = id
-					}))
+					if id ~= hostevent.peer:index() then
+						hostevent.peer:send(encode_message({
+							cmd = "new-player",
+							username = ply.username,
+							uniqueid = ply.uniqueid,
+							id = id
+						}))
+
+						-- debugging: print all players
+						print(id .. " => " .. ply.username .. "#" .. ply.uniqueid)
+					end
 				end
 				
 				-- Tell all players about the new player

@@ -46,9 +46,7 @@ end
 
 function love.quit()
 	connection:send({
-		cmd = "player-left",
-		id = localplayer,
-		username = username
+		cmd = "player-left"
 	})
 	connection:close()
 end
