@@ -1,28 +1,10 @@
 require("client.network")
+require("client.messages")
 
-connection = nil
 username = nil
- 
+connection = nil
 localplayer = nil
 players = {}
-
-event_handlers = {}
- 
-function register_handler(name, func)
-	if event_handlers[name] == nil then
-		event_handlers[name] = {}
-	end
- 
-	table.insert(event_handlers[name], func)
-end
-
-function incoming_message(msg)
-	if msg.cmd and event_handlers[msg.cmd] then
-		for _, handler in pairs(event_handlers[msg.cmd]) do
-			handler(msg)
-		end
-	end
-end
 
 function handle_update_position(msg)
 	if tonumber(msg.id) ~= localplayer then
@@ -46,8 +28,8 @@ function handle_new_player(msg)
 end
 
 function love.load(args)
-	register_handler("new-player", handle_new_player)
-	register_handler("update-position", handle_update_position)
+	subscribe_message("new-player", handle_new_player)
+	subscribe_message("update-position", handle_update_position)
  
 	username = args[2]
 	connection = connect(args[1]);
