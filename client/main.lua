@@ -6,8 +6,6 @@ players = {}
 username = nil
 connection = nil
 
-event_handlers = {}
-
 next_update = 1.0
 cur_time = 0.0
 
