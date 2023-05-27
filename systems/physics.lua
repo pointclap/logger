@@ -11,11 +11,12 @@ end
 
 
 local accumulated_deltatime = 0
+local fixed_timestep = 0.008
 function update_physics(dt)
     accumulated_deltatime = accumulated_deltatime + dt
 
-    while accumulated_deltatime > 0.008 do
-        accumulated_deltatime = accumulated_deltatime - 0.008
+    while accumulated_deltatime > fixed_timestep do
+        accumulated_deltatime = accumulated_deltatime - fixed_timestep
         for _, player in pairs(players) do
             if player.body ~= nil then
                 if player.velocity ~= nil then
@@ -28,7 +29,7 @@ function update_physics(dt)
             end
         end
 
-        world:update(dt, velocity_iterations, position_iterations)
+        world:update(fixed_timestep, velocity_iterations, position_iterations)
 
         for _, player in pairs(players) do
             if player.body then
