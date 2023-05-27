@@ -111,8 +111,8 @@ function interpolate_player_location(dt)
             local x_distance = x - player.model.x
             local y_distance = y - player.model.y
 
-            player.model.x = player.model.x + x_distance * dt
-            player.model.y = player.model.y + y_distance * dt
+            player.model.x = player.model.x + x_distance * dt * 20.0
+            player.model.y = player.model.y + y_distance * dt * 20.0
         end
     end
 end
