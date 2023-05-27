@@ -1,11 +1,11 @@
-enet = require "enet"
- 
-clientpeer = nil
+require("client.network")
+
+connection = nil
 username = nil
  
 localplayer = nil
 players = {}
- 
+
 event_handlers = {}
  
 function register_handler(name, func)
@@ -17,27 +17,13 @@ function register_handler(name, func)
 end
 
 function incoming_message(msg)
-	tbl = {}
-	for k, v in msg:gmatch("([^=]+)=([^;]+);") do
-		tbl[k] = v
-	end
- 
-	if tbl["cmd"] and event_handlers[tbl["cmd"]] then
-		for _, handler in pairs(event_handlers[tbl["cmd"]]) do
-			handler(tbl)
+	if msg["cmd"] and event_handlers[msg["cmd"]] then
+		for _, handler in pairs(event_handlers[msg["cmd"]]) do
+			handler(msg)
 		end
 	end
 end
- 
-function outgoing_message(msg)
-	encoded = ""
-	for k, v in pairs(msg)	do
-		encoded = encoded .. k .. "=" .. v ..";"
-	end
- 
-	clientpeer:send(encoded)
-end
- 
+
 function handle_update_position(msg)
 	if tonumber(msg["id"]) ~= localplayer then
 		local player_id = tonumber(msg["id"])
@@ -45,7 +31,7 @@ function handle_update_position(msg)
 		players[player_id].y = tonumber(msg["y"])
 	end
 end
- 
+
 function handle_new_player(msg)
 	if msg["username"] == username then
 		localplayer = tonumber(msg["id"])
@@ -58,7 +44,7 @@ function handle_new_player(msg)
 		y = 0
 	}
 end
- 
+
 function love.load(args)
     local connect_address = args[1] .. ":27031"
     print("connecting to " .. connect_address)
@@ -68,11 +54,9 @@ function love.load(args)
  
 	username = args[2]
  
-    enetclient = enet.host_create()
- 
-    clientpeer = enetclient:connect(connect_address)
+	connection = connect(args[1]);
 end
- 
+
 next_update = 1.0
 cur_time = 0.0
 function love.update(dt)
@@ -100,7 +84,7 @@ function love.update(dt)
 		end
  
 		if players[localplayer].x ~= x or players[localplayer].y ~= y then
-			outgoing_message({
+			connection:send({
 				cmd = "update-position",
 				id = localplayer,
 				x = x,
@@ -112,15 +96,13 @@ function love.update(dt)
 		end
 	end
  
-    local event = enetclient:service(0)
-    while event do
-        if event.type == "receive" then
-            print("received message: " .. event.data)
+	for _, event in pairs(connection:events()) do
+		if event.type == "receive" then
 			incoming_message(event.data)
  
         elseif event.type == "connect" then
             print("connected to server")
-			outgoing_message({
+			connection:send({
 				cmd = "new-player",
 				username = username
 			})
@@ -128,10 +110,9 @@ function love.update(dt)
         elseif event.type == "disconnected" then
             print("disconnected")
         end
-        event = enetclient:service()
-    end
+	end
 end
- 
+
 function love.draw()
 	local color_index = 1
 	local width, height = love.graphics.getDimensions()
