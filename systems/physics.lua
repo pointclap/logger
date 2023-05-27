@@ -30,6 +30,7 @@ function update_physics(dt)
         accumulated_deltatime = accumulated_deltatime - fixed_timestep
         world:update(fixed_timestep, velocity_iterations, position_iterations)
         apply_drag(fixed_timestep)
+        interpolate_player_location(fixed_timestep)
     end
 
     for _, player in pairs(players) do

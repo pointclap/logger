@@ -42,7 +42,6 @@ local function update(dt)
 	end
 
 	update_physics(dt)
-	interpolate_player_location(dt)
 
 	if cur_time > next_update then
 		next_update = cur_time + tick_rate
