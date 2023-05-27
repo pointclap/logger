@@ -1,14 +1,18 @@
 local enet = require "enet"
 
+-- "Connection" class used for sending
+-- and receiving data from the server.
 local connection = {}
-local connection_meta = {__index = connection}
 
+-- Get all new events from the server
 function connection:events()
     local all_events = {}
 
     local event = self.client:service()
     while event do
         if event.type == "receive" then
+            -- Messages are encoded using a key1=value1;key2=value2;
+            -- format. Decode the format into a flat table instead.
             decoded_message = {}
             for k, v in event.data:gmatch("([^=]+)=([^;]+);") do
                 decoded_message[k] = v
@@ -40,5 +44,5 @@ function connect(ip_address)
     return setmetatable({
         client = client,
         peer = peer,
-    }, connection_meta)
+    }, {__index = connection})
 end

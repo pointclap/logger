@@ -17,26 +17,26 @@ function register_handler(name, func)
 end
 
 function incoming_message(msg)
-	if msg["cmd"] and event_handlers[msg["cmd"]] then
-		for _, handler in pairs(event_handlers[msg["cmd"]]) do
+	if msg.cmd and event_handlers[msg.cmd] then
+		for _, handler in pairs(event_handlers[msg.cmd]) do
 			handler(msg)
 		end
 	end
 end
 
 function handle_update_position(msg)
-	if tonumber(msg["id"]) ~= localplayer then
-		local player_id = tonumber(msg["id"])
-		players[player_id].x = tonumber(msg["x"])
-		players[player_id].y = tonumber(msg["y"])
+	if tonumber(msg.id) ~= localplayer then
+		local player_id = tonumber(msg.id)
+		players[player_id].x = tonumber(msg.x)
+		players[player_id].y = tonumber(msg.y)
 	end
 end
 
 function handle_new_player(msg)
 	if msg["username"] == username then
-		localplayer = tonumber(msg["id"])
+		localplayer = tonumber(msg.id)
 	else
-		print("New player \"" .. msg["username"] .. "\" joined!")
+		print("New player \"" .. msg.username .. "\" joined!")
 	end
  
 	players[tonumber(msg["id"])] = {
@@ -46,14 +46,10 @@ function handle_new_player(msg)
 end
 
 function love.load(args)
-    local connect_address = args[1] .. ":27031"
-    print("connecting to " .. connect_address)
- 
 	register_handler("new-player", handle_new_player)
 	register_handler("update-position", handle_update_position)
  
 	username = args[2]
- 
 	connection = connect(args[1]);
 end
 
