@@ -1,6 +1,10 @@
 local enet = require "enet"
 local enethost = nil
 local connected_players = {}
+local curtime = 0.0
+local nextupdate = 0.0
+local TICK_RATE = 1 / 60.0
+local entities = {}
 
 local function load(args)
     enethost = enet.host_create("*:27031")
@@ -17,6 +21,10 @@ local function encode_message(msg)
 end
 
 local function update(dt)
+    curtime = curtime + dt
+    if curtime < nextupdate then return end
+    nextupdate = curtime + TICK_RATE
+
     local hostevent = enethost:service()
     if hostevent then
         if hostevent.type == "connect" then

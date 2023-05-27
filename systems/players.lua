@@ -133,15 +133,20 @@ function render_player_model()
 
         if player.model then
             love.graphics.circle("fill", player.model.x, player.model.y, player.model.radius)
-        end
+            
+            if player.username then
+                local text = love.graphics.newText(font, {{colour.r, colour.g, colour.b}, player.username})
+                love.graphics.push()
+                love.graphics.scale(2)
+                local textWidth, textHeight = text:getDimensions()
+                love.graphics.draw(text,
+                                   player.model.x / 2 - (textWidth / 2), 
+                                   ((player.model.y - 20) / 2) - (textHeight / 2))
+                love.graphics.pop()
+                --love.graphics.scale(0.5)
 
-        -- if player.username then
-        --     local text = love.graphics.newText(font, {colour, player.username})
-        --     love.graphics.scale(2)
-        --     local textWidth, textHeight = text:getDimensions()
-        --     love.graphics.draw(text, player.model.x - textWidth / 2, player.model.y - 10 - textHeight / 2)
-        --     love.graphics.scale(0.5)
-        -- end
+            end
+        end
 
         color_index = color_index + 1
 	end
