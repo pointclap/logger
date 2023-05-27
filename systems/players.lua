@@ -203,6 +203,6 @@ function render()
             render_player(player)
         end
     end
-	
+	render_debug_bodies()
     love.graphics.pop()
 end

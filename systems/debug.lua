@@ -11,3 +11,18 @@ function print_debug_information(dt)
     end
     love.graphics.draw(framerate, 20, 20)
 end
+
+function render_debug_bodies()
+    for _, player in pairs(players) do
+        if player.body then
+            local x, y = player.body:getPosition()
+
+            for _, fixture in pairs(player.body:getFixtures()) do
+                local shape = fixture:getShape()
+                if shape:getType() == "circle" then
+                    love.graphics.circle("line", x, y, shape:getRadius())
+                end
+            end
+        end
+    end
+end
