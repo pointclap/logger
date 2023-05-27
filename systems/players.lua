@@ -73,11 +73,11 @@ function interpolate_player_location(dt)
         if player.body and player.model then
             local x, y = player.body:getPosition()
 
-            --player.model.x = player.model.x + (x - player.model.x) * dt * 100.0
-            --player.model.y = player.model.y + (y - player.model.y) * dt * 100.0
+            local x_distance = x - player.model.x
+            local y_distance = y - player.model.y
 
-            player.model.x = x
-            player.model.y = y
+            player.model.x = player.model.x + x_distance * dt * 10.0
+            player.model.y = player.model.y + y_distance * dt * 10.0
         end
     end
 end
