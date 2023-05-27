@@ -2,6 +2,7 @@ localplayer = nil
 
 subscribe_message("new-player", function(msg)
     if msg.username == username and localplayer == nil then
+        print("localplayer not set, assigning " .. msg.id)
         localplayer = tonumber(msg.id)
     else
         print("New player " .. msg.username .. "#" .. msg.uniqueid .. " joined!")

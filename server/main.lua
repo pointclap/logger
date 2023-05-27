@@ -98,6 +98,7 @@ function ServerListen()
 				enethost:broadcast(encode_message({
 					cmd = "player-left",
 					username = players[hostevent.peer:index()].username,
+					uniqueid = players[hostevent.peer:index()].uniqueid,
 					id = hostevent.peer:index()
 				}))
 	

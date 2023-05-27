@@ -105,7 +105,7 @@ function love.draw()
 	local color_index = 1
 	local width, height = love.graphics.getDimensions()
 
-	if localplayer then
+	if localplayer and players[localplayer] then
 		love.graphics.translate(-players[localplayer].x + width / 2, -players[localplayer].y + height / 2)
 	end
  
