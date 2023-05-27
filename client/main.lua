@@ -1,36 +1,12 @@
 require("client.network")
 require("client.messages")
+require("client.systems.players")
 
+players = {}
 username = nil
 connection = nil
-localplayer = nil
-players = {}
-
-function handle_update_position(msg)
-	if tonumber(msg.id) ~= localplayer then
-		local player_id = tonumber(msg.id)
-		players[player_id].x = tonumber(msg.x)
-		players[player_id].y = tonumber(msg.y)
-	end
-end
-
-function handle_new_player(msg)
-	if msg["username"] == username then
-		localplayer = tonumber(msg.id)
-	else
-		print("New player \"" .. msg.username .. "\" joined!")
-	end
- 
-	players[tonumber(msg["id"])] = {
-		x = 0,
-		y = 0
-	}
-end
 
 function love.load(args)
-	subscribe_message("new-player", handle_new_player)
-	subscribe_message("update-position", handle_update_position)
- 
 	username = args[2]
 	connection = connect(args[1]);
 end
