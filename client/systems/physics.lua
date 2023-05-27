@@ -69,7 +69,7 @@ subscribe_message("new-player", function(msg)
     }
 
     local body = love.physics.newBody(world, 0, 0, "dynamic");
-    local shape = love.physics.newCircleShape(20)
+    local shape = love.physics.newCircleShape(10)
     love.physics.newFixture(body, shape, 5)
 
     players[tonumber(msg.id)].body = body
