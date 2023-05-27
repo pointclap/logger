@@ -6,7 +6,7 @@ players = {}
 username = nil
 connection = nil
 
-next_update = 1.0
+next_update = 0.1
 cur_time = 0.0
 
 local font = love.graphics.newFont(7, "mono")
@@ -110,13 +110,8 @@ function love.draw()
 	end
  
 	for id, player in pairs(players) do
-		local colour = hsv2rgb(30 * (id - 1), 100, 100)
-		local smallColour = {
-			colour.r / 255.0,
-			colour.g / 255.0,
-			colour.b / 255.0
-		}
-
+		local colour = hsl2rgb(id/12)
+		
 		love.graphics.setColor(
 			colour.r,
 			colour.g,
@@ -126,7 +121,7 @@ function love.draw()
 		love.graphics.circle("fill", player.x, player.y, 10)
 
 		if player.username then
-			local text = love.graphics.newText(font, {smallColour, player.username})
+			local text = love.graphics.newText(font, {colour, player.username})
 			love.graphics.scale(2)
 			local textWidth, textHeight = text:getDimensions()
 			love.graphics.draw(text, player.x - textWidth / 2, player.y - 10 - textHeight / 2)
@@ -137,6 +132,22 @@ function love.draw()
 	end
 end
 
-function hsv2rgb(a, b, c)
-	return {r=a, g=b, b=c}
+-- Converts HSL to RGB. (input and output range: 0 - 1)
+function hsl2rgb(h, s, l, a)
+	if s == nil then s = 1 end
+	if l == nil then l = 0.5 end
+	if a == nil then a = 1 end
+
+	if s<=0 then return {r=l,g=l,b=l,a=a} end
+	h, s, v = h*6, s, l
+	local c = (1-math.abs(2*l-1))*s
+	local x = (1-math.abs(h%2-1))*c
+	local m,r,g,b = (l-.5*c), 0,0,0
+	if h < 1     then r,g,b = c,x,0
+	elseif h < 2 then r,g,b = x,c,0
+	elseif h < 3 then r,g,b = 0,c,x
+	elseif h < 4 then r,g,b = 0,x,c
+	elseif h < 5 then r,g,b = x,0,c
+	else              r,g,b = c,0,x
+	end return {r=r+m, g=g+m, b=b+m, a=a}
 end
