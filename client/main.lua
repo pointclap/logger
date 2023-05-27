@@ -9,10 +9,6 @@ connection = nil
 
 next_update = 0.1
 cur_time = 0.0
-
-local font = love.graphics.newFont(7, "mono")
-font:setFilter("nearest")
-love.graphics.setFont(font)
  
 function love.load(args)
 	username = args[2]

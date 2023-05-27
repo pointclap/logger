@@ -1,5 +1,9 @@
 localplayer = nil
 
+local font = love.graphics.newFont(7, "mono")
+font:setFilter("nearest")
+love.graphics.setFont(font)
+
 local function hsl2rgb(h, s, l, a)
 	if s == nil then s = 1 end
 	if l == nil then l = 0.5 end
@@ -125,13 +129,13 @@ function render_player_model()
             love.graphics.circle("fill", player.model.x, player.model.y, player.model.radius)
         end
 
-        if player.username then
-            local text = love.graphics.newText(font, {colour, player.username})
-            love.graphics.scale(2)
-            local textWidth, textHeight = text:getDimensions()
-            love.graphics.draw(text, player.model.x - textWidth / 2, player.model.y - 10 - textHeight / 2)
-            love.graphics.scale(0.5)
-        end
+        -- if player.username then
+        --     local text = love.graphics.newText(font, {colour, player.username})
+        --     love.graphics.scale(2)
+        --     local textWidth, textHeight = text:getDimensions()
+        --     love.graphics.draw(text, player.model.x - textWidth / 2, player.model.y - 10 - textHeight / 2)
+        --     love.graphics.scale(0.5)
+        -- end
 
         color_index = color_index + 1
 	end
