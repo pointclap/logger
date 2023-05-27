@@ -1,5 +1,4 @@
 localplayer = nil
-local width, height = love.graphics.getDimensions()
 
 local font = love.graphics.newFont(7, "mono")
 font:setFilter("nearest")
@@ -75,7 +74,7 @@ subscribe_message("new-player", function(msg)
     players[id].username = msg.username
     players[id].uniqueid = tonumber(msg.uniqueid)
     players[id].username_text = love.graphics.newText(font, {{colour.r, colour.g, colour.b},
-                                                                           msg.username .. "#" .. msg.uniqueid})
+                                                             msg.username .. "#" .. msg.uniqueid})
 end)
 
 subscribe_message("player-left", function(msg)
@@ -163,13 +162,6 @@ local function render_player(player)
 
     if player.model then
         love.graphics.circle("fill", player.model.x, player.model.y, player.model.radius)
-        if player.mouseX and player.mouseY then
-            love.graphics.push()
-            love.graphics.translate(players[localplayer].model.x - width / 2, players[localplayer].model.y - height / 2)
-            love.graphics.circle("fill", player.mouseX, player.mouseY, 3)
-            love.graphics.pop()
-        end
-
         if player.username and player.uniqueid then
             local fontSize = 2
 
@@ -183,26 +175,24 @@ local function render_player(player)
     end
 end
 
-function render()
-    love.graphics.push()
-
-    if localplayer and players[localplayer] then
-		love.graphics.translate(-players[localplayer].model.x + width / 2, -players[localplayer].model.y + height / 2)
-	end
-
+function local_render()
     -- render all other plays first..
     for id, player in pairs(players) do
         if id ~= localplayer then
             render_player(player)
         end
     end
+    if localplayer then
+        render_player(players[localplayer])
+    end
+end
 
-    -- ..then local player on top
+function global_render()
     for id, player in pairs(players) do
-        if id == localplayer then
-            render_player(player)
+        if player.mouseX and player.mouseY then
+            love.graphics.push()
+            love.graphics.circle("fill", player.mouseX, player.mouseY, 3)
+            love.graphics.pop()
         end
     end
-	render_debug_bodies()
-    love.graphics.pop()
 end
