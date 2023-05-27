@@ -6,8 +6,6 @@ players = {}
 username = nil
 connection = nil
 
-function love.load(args) 
-
 event_handlers = {}
 
 next_update = 1.0
@@ -17,60 +15,7 @@ local font = love.graphics.newFont(7, "mono")
 font:setFilter("nearest")
 love.graphics.setFont(font)
  
-function register_handler(name, func)
-	if event_handlers[name] == nil then
-		event_handlers[name] = {}
-	end
- 
-	table.insert(event_handlers[name], func)
-end
-
-function incoming_message(msg)
-	if msg.cmd and event_handlers[msg.cmd] then
-		for _, handler in pairs(event_handlers[msg.cmd]) do
-			handler(msg)
-		end
-	end
-end
-
-function handle_update_position(msg)
-	if tonumber(msg.id) ~= localplayer then
-		local player_id = tonumber(msg.id)
-		players[player_id].x = tonumber(msg.x)
-		players[player_id].y = tonumber(msg.y)
-	end
-end
-
-function handle_new_player(msg)
-	if msg["username"] == username then
-		localplayer = tonumber(msg.id)
-	else
-		print("New player \"" .. msg.username .. "\" joined!")
-	end
- 
-	players[tonumber(msg["id"])] = {
-		x = 0,
-		y = 0,
-        mouseX = 0,
-        mouseY = 0,
-        username = username
-	}
-end
-
-function handle_player_left(msg)
-	local player_id = tonumber(msg["id"])
-
-	if players[player_id] then
-		players[player_id] = nil
-	end
-end
-
 function love.load(args)
-	register_handler("new-player", handle_new_player)
-	register_handler("update-position", handle_update_position)
-    register_handler("update-mouse", handle_mouse_position)
-	register_handler("player-left", handle_player_left)
- 
 	username = args[2]
 	connection = connect(args[1]);
 end
@@ -130,20 +75,22 @@ function love.update(dt)
         end
 	end
  
-	for _, event in pairs(connection:events()) do
-		if event.type == "receive" then
-			incoming_message(event.data)
- 
-        elseif event.type == "connect" then
-            print("connected to server")
-			connection:send({
-				cmd = "new-player",
-				username = username
-			})
- 
-        elseif event.type == "disconnected" then
-            print("disconnected")
-        end
+	if connection then
+		for _, event in pairs(connection:events()) do
+			if event.type == "receive" then
+				incoming_message(event.data)
+	
+			elseif event.type == "connect" then
+				print("connected to server")
+				connection:send({
+					cmd = "new-player",
+					username = username
+				})
+	
+			elseif event.type == "disconnected" then
+				print("disconnected")
+			end
+		end
 	end
 end
 
@@ -191,4 +138,7 @@ function love.draw()
 		color_index = color_index + 1
 	end
 end
+
+function hsv2rgb(a, b, c)
+	return {r=a, g=b, b=c}
 end
