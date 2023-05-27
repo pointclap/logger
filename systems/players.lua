@@ -79,7 +79,6 @@ function interpolate_player_location(dt)
     end
 end
 
-
 function player_movement(dt)
     if localplayer then 
 		if love.window.hasMouseFocus() then
@@ -105,15 +104,11 @@ function player_movement(dt)
 end
 
 local cur_time = 0
-local next_update = nil
+local next_update = 0
 function send_updated_position(dt)
     cur_time = cur_time + dt
-    if next_update == nil then
-        next_update = cur_time
-    end
-
     if localplayer and cur_time > next_update then
-        next_update = cur_time + 0.016
+        next_update = cur_time + 0.1
         connection:send({
             cmd = "update-position",
             id = localplayer,
