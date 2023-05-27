@@ -189,6 +189,7 @@ end
 
 function global_render()
     for id, player in pairs(players) do
+        love.graphics.setColor(player.colour.r, player.colour.g, player.colour.b)
         if player.mouseX and player.mouseY then
             love.graphics.push()
             love.graphics.circle("fill", player.mouseX, player.mouseY, 3)
