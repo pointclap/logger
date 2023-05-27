@@ -60,15 +60,7 @@ local function quit()
 end
 
 local function draw()
-	local width, height = love.graphics.getDimensions()
-
-	love.graphics.push()
-	if localplayer and players[localplayer] then
-		love.graphics.translate(-players[localplayer].model.x + width / 2, -players[localplayer].model.y + height / 2)
-	end
-	render_player_model()
-	love.graphics.pop()
-
+	render()
 	print_debug_information(delta_time)
 end
 

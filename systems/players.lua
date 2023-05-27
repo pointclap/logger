@@ -122,7 +122,7 @@ function player_movement(dt)
             local x, y = love.mouse.getPosition()
             players[localplayer].mouseX = x
             players[localplayer].mouseY = y
-            
+
             local ms = 100000.0 * dt
             local force_x = 0
             local force_y = 0
@@ -179,7 +179,14 @@ local function render_player(player)
     end
 end
 
-function render_player_model()
+function render()
+    love.graphics.push()
+    local width, height = love.graphics.getDimensions()
+
+    if localplayer and players[localplayer] then
+		love.graphics.translate(-players[localplayer].model.x + width / 2, -players[localplayer].model.y + height / 2)
+	end
+
     -- render all other plays first..
     for id, player in pairs(players) do
         if id ~= localplayer then
@@ -193,4 +200,6 @@ function render_player_model()
             render_player(player)
         end
     end
+	
+    love.graphics.pop()
 end
