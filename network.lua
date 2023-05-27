@@ -2,10 +2,10 @@ local enet = require "enet"
 
 -- "Connection" class used for sending
 -- and receiving data from the server.
-local connection = {}
+local server_connection_class = {}
 
 -- Get all new events from the server
-function connection:events()
+function server_connection_class:events()
     local all_events = {}
 
     local event = self.client:service()
@@ -28,7 +28,7 @@ function connection:events()
     return all_events
 end
 
-function connection:send(data)
+function server_connection_class:send(data)
     local encoded = ""
     for k, v in pairs(data) do
         encoded = encoded .. k .. "=" .. v .. ";"
@@ -37,7 +37,7 @@ function connection:send(data)
     self.peer:send(encoded)
 end
 
-function connection:close()
+function server_connection_class:close()
     self.client:flush()
     self.client:destroy()
 end
@@ -49,5 +49,5 @@ function connect(ip_address)
     return setmetatable({
         client = client,
         peer = peer,
-    }, {__index = connection})
+    }, {__index = server_connection_class})
 end

@@ -1,24 +1,20 @@
-require("client.network")
-require("client.messages")
-require("client.systems.players")
-require("client.systems.physics")
+require("network")
+require("messages")
+require("systems.players")
+require("systems.physics")
 
 players = {}
 username = nil
 connection = nil
-
-next_update = 0.1
-cur_time = 0.0
  
-function love.load(args)
+local function load(args)
 	username = args[2]
 	connection = connect(args[1]);
 
 	init_physics()
 end
 
-function love.update(dt)
-	cur_time = cur_time + dt
+local function update(dt)
 	if connection then
 		for _, event in pairs(connection:events()) do
 			if event.type == "receive" then
@@ -41,17 +37,17 @@ function love.update(dt)
 	apply_drag(dt)
 	update_physics(dt)
 	interpolate_player_location(dt)
-	send_updated_position()
+	send_updated_position(dt)
 end
 
-function love.quit()
+local function quit()
 	connection:send({
 		cmd = "player-left"
 	})
 	connection:close()
 end
 
-function love.draw()
+local function draw()
 	local width, height = love.graphics.getDimensions()
 
 	if localplayer and players[localplayer] then
@@ -60,3 +56,10 @@ function love.draw()
  
 	render_player_model()
 end
+
+return {
+	draw = draw,
+	load = load,
+	update = update,
+	quit = quit
+}
