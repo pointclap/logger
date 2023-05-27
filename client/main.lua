@@ -110,13 +110,9 @@ function love.draw()
 	end
  
 	for id, player in pairs(players) do
-		local colour = hsl2rgb(id/12)
+		local colour = hsl2rgb((id-1)/12)
 		
-		love.graphics.setColor(
-			colour.r,
-			colour.g,
-			colour.b
-		)
+		love.graphics.setColor(colour.r, colour.g, colour.b, colour.a)
 
 		love.graphics.circle("fill", player.x, player.y, 10)
 

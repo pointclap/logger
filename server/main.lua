@@ -68,7 +68,6 @@ function ServerListen()
 					id = hostevent.peer:index()
 				}))
 			elseif tbl.cmd == "player-left" then
-				print("test")
 				enethost:broadcast(encode_message({
 					cmd = "player-left",
 					username = players[hostevent.peer:index()],
