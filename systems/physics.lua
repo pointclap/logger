@@ -8,37 +8,45 @@ function init_physics()
     world = love.physics.newWorld(0, 0, true)
 end
 
-function update_physics(dt)
-    for _, player in pairs(players) do
-        if player.body ~= nil then
-            if player.velocity ~= nil then
-                player.body:setLinearVelocity(player.velocity.x, player.velocity.y)
-            end
 
-            if player.position ~= nil then
-                player.body:setPosition(player.position.x, player.position.y)
+local cur_time = 0
+local next_update = 0
+function update_physics(dt)
+    cur_time = cur_time + dt
+
+    if cur_time > next_update then
+        next_update = cur_time + 0.008
+        for _, player in pairs(players) do
+            if player.body ~= nil then
+                if player.velocity ~= nil then
+                    player.body:setLinearVelocity(player.velocity.x, player.velocity.y)
+                end
+
+                if player.position ~= nil then
+                    player.body:setPosition(player.position.x, player.position.y)
+                end
             end
         end
-    end
 
-    world:update(dt, velocity_iterations, position_iterations)
+        world:update(dt, velocity_iterations, position_iterations)
 
-    for _, player in pairs(players) do
-        if player.body then
-            if player.velocity then
-                local x, y = player.body:getLinearVelocity()
-                player.velocity = {
-                    x = x,
-                    y = y
-                }
-            end
+        for _, player in pairs(players) do
+            if player.body then
+                if player.velocity then
+                    local x, y = player.body:getLinearVelocity()
+                    player.velocity = {
+                        x = x,
+                        y = y
+                    }
+                end
 
-            if player.position ~= nil then
-                local x, y = player.body:getPosition()
-                player.position = {
-                    x = x,
-                    y = y
-                }
+                if player.position ~= nil then
+                    local x, y = player.body:getPosition()
+                    player.position = {
+                        x = x,
+                        y = y
+                    }
+                end
             end
         end
     end

@@ -79,7 +79,6 @@ function interpolate_player_location(dt)
     end
 end
 
-
 function player_movement(dt)
     if localplayer then 
 		if love.window.hasMouseFocus() then
