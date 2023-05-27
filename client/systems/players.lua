@@ -81,10 +81,7 @@ end
 
 
 function player_movement(dt)
-    if localplayer then
-		local x = players[localplayer].x
-		local y = players[localplayer].y
- 
+    if localplayer then 
 		if love.window.hasMouseFocus() then
 			local ms = 100000.0 * dt
             local force_x = 0
