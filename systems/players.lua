@@ -49,28 +49,31 @@ local function hsl2rgb(h, s, l, a)
 end
 
 subscribe_message("new-player", function(msg)
+    local id = tonumber(msg.id)
     if msg.username == username and localplayer == nil then
         print("localplayer not set, assigning " .. msg.id)
-        localplayer = tonumber(msg.id)
+        localplayer = id
     else
         print("New player " .. msg.username .. "#" .. msg.uniqueid .. " joined!")
     end
 
-    if players[tonumber(msg.id)] == nil then
-        players[tonumber(msg.id)] = {}
+    if players[id] == nil then
+        players[id] = {}
     end
 
-    players[tonumber(msg.id)].model = {
+    players[id].model = {
         x = 0,
         y = 0,
         radius = 10
     }
 
-    local colour = hsl2rgb((tonumber(msg.id) - 1) / 12)
-    players[tonumber(msg.id)].colour = colour
-    players[tonumber(msg.id)].username = msg.username
-    players[tonumber(msg.id)].uniqueid = tonumber(msg.uniqueid)
-    players[tonumber(msg.id)].username_text = love.graphics.newText(font, {{colour.r, colour.g, colour.b},
+    local colour = hsl2rgb((id - 1) / 12)
+    players[id].colour = colour
+    players[id].mouseX = 0
+    players[id].mouseY = 0
+    players[id].username = msg.username
+    players[id].uniqueid = tonumber(msg.uniqueid)
+    players[id].username_text = love.graphics.newText(font, {{colour.r, colour.g, colour.b},
                                                                            msg.username .. "#" .. msg.uniqueid})
 end)
 
@@ -85,6 +88,8 @@ subscribe_message("update-position", function(msg)
         if players[player_id] and players[player_id].position then
             players[player_id].position.x = tonumber(msg.x)
             players[player_id].position.y = tonumber(msg.y)
+            players[player_id].mouseX = tonumber(msg.mouseX)
+            players[player_id].mouseY = tonumber(msg.mouseY)
         end
     end
 end)
@@ -114,6 +119,10 @@ end
 function player_movement(dt)
     if localplayer then
         if love.window.hasMouseFocus() then
+            local x, y = love.mouse.getPosition()
+            players[localplayer].mouseX = x
+            players[localplayer].mouseY = y
+            
             local ms = 100000.0 * dt
             local force_x = 0
             local force_y = 0
@@ -141,30 +150,47 @@ function send_updated_position(dt)
             cmd = "update-position",
             id = localplayer,
             x = players[localplayer].position.x,
-            y = players[localplayer].position.y
+            y = players[localplayer].position.y,
+            mouseX = players[localplayer].mouseX,
+            mouseY = players[localplayer].mouseY
         })
     end
 end
 
+local function render_player(player)
+    love.graphics.setColor(player.colour.r, player.colour.g, player.colour.b)
+
+    if player.model then
+        love.graphics.circle("fill", player.model.x, player.model.y, player.model.radius)
+        if player.mouseX and player.mouseY then
+            love.graphics.circle("fill", player.mouseX, player.mouseY, 3)
+        end
+
+        if player.username and player.uniqueid then
+            local fontSize = 2
+
+            love.graphics.push()
+            love.graphics.scale(fontSize)
+            local textWidth, textHeight = player.username_text:getDimensions()
+            love.graphics.draw(player.username_text, player.model.x / fontSize - (textWidth / 2),
+                ((player.model.y - 20) / fontSize) - (textHeight / 2))
+            love.graphics.pop()
+        end
+    end
+end
+
 function render_player_model()
-    local color_index = 1
-
+    -- render all other plays first..
     for id, player in pairs(players) do
-        love.graphics.setColor(player.colour.r, player.colour.g, player.colour.b)
+        if id ~= localplayer then
+            render_player(player)
+        end
+    end
 
-        if player.model then
-            love.graphics.circle("fill", player.model.x, player.model.y, player.model.radius)
-
-            if player.username and player.uniqueid then
-                local fontSize = 2
-
-                love.graphics.push()
-                love.graphics.scale(fontSize)
-                local textWidth, textHeight = player.username_text:getDimensions()
-                love.graphics.draw(player.username_text, player.model.x / fontSize - (textWidth / 2),
-                    ((player.model.y - 20) / fontSize) - (textHeight / 2))
-                love.graphics.pop()
-            end
+    -- ..then local player on top
+    for id, player in pairs(players) do
+        if id == localplayer then
+            render_player(player)
         end
     end
 end
