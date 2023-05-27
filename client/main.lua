@@ -56,7 +56,7 @@ end
 function love.draw()
 	local width, height = love.graphics.getDimensions()
 
-	if localplayer then
+	if localplayer and players[localplayer] then
 		love.graphics.translate(-players[localplayer].model.x + width / 2, -players[localplayer].model.y + height / 2)
 	end
  
