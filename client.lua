@@ -3,6 +3,7 @@ require("messages")
 require("systems.players")
 require("systems.physics")
 require("systems.debug")
+require("systems.models")
 
 players = {}
 username = nil
@@ -42,6 +43,7 @@ local function update(dt)
 	end
 
 	update_physics(dt)
+	update_animation(dt)
 
 	if cur_time > next_update then
 		next_update = cur_time + tick_rate
@@ -63,11 +65,11 @@ local function draw()
 			love.graphics.translate(-players[localplayer].model.x + width / 2, -players[localplayer].model.y + height / 2)
 		end
 
-		local_render()
+		render_model()
 		render_debug_bodies()
 	love.graphics.pop()
 
-	global_render()
+	render_cursors()
 	print_debug_information(delta_time)
 end
 

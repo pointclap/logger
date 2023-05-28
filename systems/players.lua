@@ -75,6 +75,8 @@ subscribe_message("new-player", function(msg)
     players[id].uniqueid = tonumber(msg.uniqueid)
     players[id].username_text = love.graphics.newText(font, {{colour.r, colour.g, colour.b},
                                                              msg.username .. "#" .. msg.uniqueid})
+
+    set_model(id, "character")
 end)
 
 subscribe_message("player-left", function(msg)
@@ -100,20 +102,6 @@ subscribe_message("update-mouse", function(msg)
         players[player_id].mouseY = tonumber(msg.mouseY)
     end
 end)
-
-function interpolate_player_location(dt)
-    for _, player in pairs(players) do
-        if player.body and player.model then
-            local x, y = player.body:getPosition()
-
-            local x_distance = x - player.model.x
-            local y_distance = y - player.model.y
-
-            player.model.x = player.model.x + x_distance * dt * 20.0
-            player.model.y = player.model.y + y_distance * dt * 20.0
-        end
-    end
-end
 
 function player_movement(dt)
     if localplayer then
@@ -158,6 +146,7 @@ function send_updated_position(dt)
     end
 end
 
+--[[
 local function render_player(player)
     love.graphics.setColor(player.colour.r, player.colour.g, player.colour.b)
 
@@ -187,8 +176,9 @@ function local_render()
         render_player(players[localplayer])
     end
 end
+]]
 
-function global_render()
+function render_cursors()
     for id, player in pairs(players) do
         love.graphics.setColor(player.colour.r, player.colour.g, player.colour.b)
         if player.mouseX and player.mouseY then
