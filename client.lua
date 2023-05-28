@@ -1,8 +1,9 @@
+local debug = require("systems.debug")
+
 require("network")
 require("messages")
 require("systems.players")
 require("systems.physics")
-require("systems.debug")
 require("systems.models")
 
 players = {}
@@ -49,6 +50,8 @@ local function update(dt)
 		next_update = cur_time + tick_rate
 		send_updated_position(dt)
 	end
+
+	debug.update(dt)
 end
 
 local function quit()
@@ -67,16 +70,21 @@ local function draw()
 
 		render_model()
 		local_render()
-		render_debug_bodies()
+		debug.draw_local()
 	love.graphics.pop()
 
 	render_cursors()
-	print_debug_information(delta_time)
+	debug.draw_global()
+end
+
+local function keyreleased(key, scancode, isrepeat)
+	debug.keyreleased(key, scancode, isrepeat)
 end
 
 return {
 	draw = draw,
 	load = load,
 	update = update,
-	quit = quit
+	quit = quit,
+	keyreleased = keyreleased
 }
