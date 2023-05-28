@@ -37,7 +37,7 @@ hooks.add("draw_local", function()
             love.graphics.draw(player.drawable_text, mouseX, mouseY + 20)
         end
     end
-end
+end)
 
 hooks.add("draw_world", function()
     if not debug_mode then return end
