@@ -20,6 +20,28 @@ local function encode_message(msg)
     return encoded
 end
 
+local function generate_uniqueid(username)
+    local newuniqueid = ""
+
+    while true do
+        local uniqueidused = 0
+        local newuniqueid = math.random(1, 9999)
+
+        for id, ply in pairs(connected_players) do
+            if ply.username == username and ply.uniqueid == newuniqueid then
+                uniqueidused = 1
+                break
+            end
+        end
+
+        if uniqueidused == 0 then
+            break
+        end
+    end
+
+    return newuniqueid
+end
+
 local function update(dt)
     curtime = curtime + dt
     if curtime < nextupdate then return end
@@ -56,23 +78,8 @@ local function update(dt)
                     username = tbl.username
                 }
 
-                while true do
-                    local uniqueidused = 0
-                    local newuniqueid = math.random(1, 9999)
-
-                    for id, ply in pairs(connected_players) do
-                        if ply.username == tbl.username and ply.uniqueid == newuniqueid then
-                            uniqueidused = 1
-                            break
-                        end
-                    end
-
-                    if uniqueidused == 0 then
-                        connected_players[hostevent.peer:index()].uniqueid = newuniqueid
-                        print(connected_players[hostevent.peer:index()].username .. "#" .. newuniqueid .. " joined")
-                        break
-                    end
-                end
+                connected_players[hostevent.peer:index()].uniqueid = generate_uniqueid(tbl.username)
+                print(tbl.username .. "#" .. newuniqueid .. " joined")
 
                 hostevent.peer:send(encode_message({
                     cmd = "new-player",
