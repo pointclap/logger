@@ -43,10 +43,9 @@ local function interpolate_position(dt)
 end
 
 hooks.add("fixed_timestep", function(fixed_timestep)
-        player_movement(fixed_timestep)
-        world:update(fixed_timestep, velocity_iterations, position_iterations)
-        apply_drag(fixed_timestep)
-        interpolate_position(fixed_timestep)
+    world:update(fixed_timestep, velocity_iterations, position_iterations)
+    apply_drag(fixed_timestep)
+    interpolate_position(fixed_timestep)
 end)
 
 messages.subscribe("new-player", function(msg)

@@ -11,8 +11,6 @@ players = {}
 username = nil
 connection = nil
 tick_rate = 1 / 10
-cur_time = 0
-next_update = 0
  
 local function load(args)
 	username = args[2]
@@ -24,7 +22,6 @@ end
 local accumulated_deltatime = 0
 local fixed_timestep = 0.008
 local function update(dt)
-	cur_time = cur_time + dt
 	if connection then
 		for _, event in pairs(connection:events()) do
 			if event.type == "receive" then
@@ -50,11 +47,6 @@ local function update(dt)
 		hooks.call("fixed_timestep", fixed_timestep)
 		accumulated_deltatime = accumulated_deltatime - fixed_timestep
 	end
-
-	if cur_time > next_update then
-		next_update = cur_time + tick_rate
-		send_updated_position(dt)
-	end
 end
 
 local function quit()
@@ -73,10 +65,7 @@ local function draw()
 			love.graphics.pop()
 		end
 
-		hooks.call("draw_local")
-		local_render()
-
-	render_cursors()
+	hooks.call("draw_local")
 end
 
 local function keyreleased(key, scancode, isrepeat)

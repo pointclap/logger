@@ -106,14 +106,14 @@ messages.subscribe("update-mouse", function(msg)
     end
 end)
 
-function player_movement(dt)
+hooks.add("fixed_timestep", function(fixed_timestep)
     if localplayer then
         if love.window.hasMouseFocus() then
             local x, y = love.mouse.getPosition()
             players[localplayer].mouseX = x
             players[localplayer].mouseY = y
 
-            local ms = 100000.0 * dt
+            local ms = 100000.0 * fixed_timestep
             local force_x = 0
             local force_y = 0
 
@@ -132,32 +132,37 @@ function player_movement(dt)
             players[localplayer].body:applyForce(force_x, force_y)
         end
     end
-end
+end)
 
-function send_updated_position(dt)
-    if localplayer then
-        local x, y = players[localplayer].body:getPosition()
-        local vx, vy = players[localplayer].body:getLinearVelocity()
+local countdown = 0
+hooks.add("update", function(dt)
+    countdown = countdown - dt
+    if countdown < 0 then
+        if localplayer then
+            local x, y = players[localplayer].body:getPosition()
+            local vx, vy = players[localplayer].body:getLinearVelocity()
 
-        connection:send({
-            cmd = "update-position",
-            id = localplayer,
-            x = x,
-            y = y,
-            vx = vx,
-            vy = vy
-        })
+            connection:send({
+                cmd = "update-position",
+                id = localplayer,
+                x = x,
+                y = y,
+                vx = vx,
+                vy = vy
+            })
 
-        connection:send({
-            cmd = "update-mouse",
-            id = localplayer,
-            mouseX = players[localplayer].mouseX,
-            mouseY = players[localplayer].mouseY
-        })
+            connection:send({
+                cmd = "update-mouse",
+                id = localplayer,
+                mouseX = players[localplayer].mouseX,
+                mouseY = players[localplayer].mouseY
+            })
+        end
+        countdown = 0.1
     end
-end
+end)
 
-function render_username(player)
+local function render_username(player)
     love.graphics.setColor(player.colour.r, player.colour.g, player.colour.b)
 
     if player.interpolated_position and player.username and player.uniqueid then
@@ -167,7 +172,7 @@ function render_username(player)
     end
 end
 
-function local_render()
+hooks.add("draw_world", function()
     -- render all other plays first..
     for id, player in pairs(players) do
         if id ~= localplayer then
@@ -178,9 +183,9 @@ function local_render()
     if localplayer then
         render_username(players[localplayer])
     end
-end
+end)
 
-function render_cursors()
+hooks.add("draw_local", function()
     if not players[localplayer] then return end
 
     local x = players[localplayer].interpolated_position.x
@@ -200,4 +205,4 @@ function render_cursors()
             love.graphics.circle("fill", mouseX, mouseY, 3)
         end
     end
-end
+end)
