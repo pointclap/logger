@@ -161,16 +161,9 @@ function render_username(player)
     love.graphics.setColor(player.colour.r, player.colour.g, player.colour.b)
 
     if player.interpolated_position and player.username and player.uniqueid then
-        love.graphics.push()
-        -- love.graphics.scale(fontSize)
         player.drawable_text:set(player.username_text)
         local w, h = player.drawable_text:getDimensions()
         love.graphics.draw(player.drawable_text, player.interpolated_position.x - w / 2, player.interpolated_position.y - 30)
-        player.drawable_text:set("int x: " .. player.interpolated_position.x)
-        love.graphics.draw(player.drawable_text, player.interpolated_position.x - w / 2, player.interpolated_position.y + 30)
-        player.drawable_text:set("int y: " .. player.interpolated_position.y)
-        love.graphics.draw(player.drawable_text, player.interpolated_position.x - w / 2, player.interpolated_position.y + 40)
-        love.graphics.pop()
     end
 end
 
@@ -205,11 +198,6 @@ function render_cursors()
             end
             
             love.graphics.circle("fill", mouseX, mouseY, 3)
-
-            player.drawable_text:set("mouseX: " .. player.mouseX)
-            love.graphics.draw(player.drawable_text, mouseX, mouseY + 10)
-            player.drawable_text:set("mouseY: " .. player.mouseY)
-            love.graphics.draw(player.drawable_text, mouseX, mouseY + 20)
         end
     end
 end
