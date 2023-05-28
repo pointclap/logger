@@ -29,7 +29,7 @@ function update_physics(dt)
         accumulated_deltatime = accumulated_deltatime - fixed_timestep
         world:update(fixed_timestep, velocity_iterations, position_iterations)
         apply_drag(fixed_timestep)
-        interpolate_model_location(fixed_timestep)
+        interpolate_position(fixed_timestep)
     end
 end
 
@@ -42,12 +42,32 @@ function apply_drag(dt)
     end
 end
 
+function interpolate_position(dt)
+    for _, player in pairs(players) do
+        if player.body and player.interpolated_position then
+            local x, y = player.body:getPosition()
+
+            local x_distance = x - player.interpolated_position.x
+            local y_distance = y - player.interpolated_position.y
+
+            player.interpolated_position.x = player.interpolated_position.x + x_distance * dt * 20.0
+            player.interpolated_position.y = player.interpolated_position.y + y_distance * dt * 20.0
+        end
+    end
+end
+
+
 subscribe_message("new-player", function(msg)
     local id = tonumber(msg.id);
 
     if players[id] == nil then
         players[id] = {}
     end
+
+    players[id].interpolated_position = {
+        x = 0,
+        y = 0
+    }
 
     local body = love.physics.newBody(world, 0, 0, "dynamic");
     local shape = love.physics.newCircleShape(10)

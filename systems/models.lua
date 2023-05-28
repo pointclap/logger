@@ -93,38 +93,14 @@ local models = {
 }
 
 function set_model(player_id, model)
-    local player = players[player_id]
-    local x, y = 0, 0
-    if player.animated then
-        x, y = player.animated.x, player.animated.y
-    elseif player.body then
-        x, y = player.body:getPosition()
-    end
-
     local model = models[model]
 
     players[player_id].animated = {
-        x = x,
-        y = y,
         model = model,
         frame = 1,
         frametime = 0,
         direction = "s",
     }
-end
-
-function interpolate_model_location(dt)
-    for _, player in pairs(players) do
-        if player.body and player.animated then
-            local x, y = player.body:getPosition()
-
-            local x_distance = x - player.animated.x
-            local y_distance = y - player.animated.y
-
-            player.animated.x = player.animated.x + x_distance * dt * 20.0
-            player.animated.y = player.animated.y + y_distance * dt * 20.0
-        end
-    end
 end
 
 function update_animation(dt)
@@ -157,7 +133,7 @@ function render_model()
             local quad = player.animated.model.animations[player.animated.animation][player.animated.direction][player.animated.frame].quad
             local x, y, w, h = quad:getViewport()
 
-            love.graphics.draw(player.animated.model.image, quad, player.animated.x - w / 2, player.animated.y - h / 2)
+            love.graphics.draw(player.animated.model.image, quad, player.interpolated_position.x - w / 2, player.interpolated_position.y - h / 2)
         end
     end
 end

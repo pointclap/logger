@@ -159,11 +159,11 @@ end
 function render_username(player)
     love.graphics.setColor(player.colour.r, player.colour.g, player.colour.b)
 
-    if player.animated and player.username and player.uniqueid then
+    if player.interpolated_position and player.username and player.uniqueid then
         love.graphics.push()
         -- love.graphics.scale(fontSize)
         local w, h = player.username_text:getDimensions()
-        love.graphics.draw(player.username_text, player.animated.x - w / 2, player.animated.y - 30)
+        love.graphics.draw(player.username_text, player.interpolated_position.x - w / 2, player.interpolated_position.y - 30)
         love.graphics.pop()
     end
 end
