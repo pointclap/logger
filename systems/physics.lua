@@ -13,7 +13,7 @@ function collision_callback(a, b, contact)
     local a, b = a:getUserData(), b:getUserData()
 
     for _, player_id in pairs({a, b}) do
-        if players[player_id].contact_sound then
+        if players[player_id] and players[player_id].contact_sound then
             players[player_id].contact_sound:play()
         end
     end
