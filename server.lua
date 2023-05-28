@@ -79,7 +79,7 @@ local function update(dt)
                 }
 
                 connected_players[hostevent.peer:index()].uniqueid = generate_uniqueid(tbl.username)
-                print(tbl.username .. "#" .. newuniqueid .. " joined")
+                print(tbl.username .. "#" .. connected_players[hostevent.peer:index()].uniqueid .. " joined")
 
                 hostevent.peer:send(encode_message({
                     cmd = "new-player",
