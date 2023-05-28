@@ -1,6 +1,6 @@
 localplayer = nil
 
-local font = love.graphics.newFont(7, "mono")
+local font = love.graphics.newFont(9, "mono")
 font:setFilter("nearest")
 love.graphics.setFont(font)
 
@@ -143,7 +143,7 @@ function send_updated_position(dt)
             x = x,
             y = y,
             vx = vx,
-            vy = vy,
+            vy = vy
         })
 
         connection:send({
@@ -155,22 +155,15 @@ function send_updated_position(dt)
     end
 end
 
---[[
-local function render_player(player)
+function render_username(player)
     love.graphics.setColor(player.colour.r, player.colour.g, player.colour.b)
 
-    if player.model then
-        love.graphics.circle("fill", player.model.x, player.model.y, player.model.radius)
-        if player.username and player.uniqueid then
-            local fontSize = 2
-
-            love.graphics.push()
-            love.graphics.scale(fontSize)
-            local textWidth, textHeight = player.username_text:getDimensions()
-            love.graphics.draw(player.username_text, player.model.x / fontSize - (textWidth / 2),
-                ((player.model.y - 20) / fontSize) - (textHeight / 2))
-            love.graphics.pop()
-        end
+    if player.animated and player.username and player.uniqueid then
+        love.graphics.push()
+        -- love.graphics.scale(fontSize)
+        local w, h = player.username_text:getDimensions()
+        love.graphics.draw(player.username_text, player.animated.x - w / 2, player.animated.y - 30)
+        love.graphics.pop()
     end
 end
 
@@ -178,14 +171,14 @@ function local_render()
     -- render all other plays first..
     for id, player in pairs(players) do
         if id ~= localplayer then
-            render_player(player)
+            render_username(player)
         end
     end
+
     if localplayer then
-        render_player(players[localplayer])
+        render_username(players[localplayer])
     end
 end
-]]
 
 function render_cursors()
     for id, player in pairs(players) do

@@ -66,6 +66,7 @@ local function draw()
 		end
 
 		render_model()
+		local_render()
 		render_debug_bodies()
 	love.graphics.pop()
 
