@@ -9,6 +9,7 @@ function print_debug_information(dt)
         countdown = 0.1
         framerate:set(math.floor(dt * 100000) / 100 .. "ms")
     end
+    love.graphics.setColor(0.8, 0.8, 0.8, 1.0)
     love.graphics.draw(framerate, 20, 20)
 end
 
