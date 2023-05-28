@@ -6,6 +6,17 @@ local drag_coefficient = 5
 function init_physics()
     love.physics.setMeter(64)
     world = love.physics.newWorld(0, 0, true)
+    world:setCallbacks(collision_callback)
+end
+
+function collision_callback(a, b, contact)
+    local a, b = a:getUserData(), b:getUserData()
+
+    for _, player_id in pairs({a, b}) do
+        if players[player_id].contact_sound then
+            players[player_id].contact_sound:play()
+        end
+    end
 end
 
 local accumulated_deltatime = 0
@@ -32,13 +43,18 @@ function apply_drag(dt)
 end
 
 subscribe_message("new-player", function(msg)
-    if players[tonumber(msg.id)] == nil then
-        players[tonumber(msg.id)] = {}
+    local id = tonumber(msg.id);
+
+    if players[id] == nil then
+        players[id] = {}
     end
 
     local body = love.physics.newBody(world, 0, 0, "dynamic");
     local shape = love.physics.newCircleShape(10)
-    love.physics.newFixture(body, shape, 5)
+    local fixture = love.physics.newFixture(body, shape, 5)
 
-    players[tonumber(msg.id)].body = body
+    -- Store the entity id in the body, so we can do collision stuff
+    fixture:setUserData(id)
+
+    players[id].body = body
 end)

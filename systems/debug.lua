@@ -1,5 +1,6 @@
-
+debug_mode = false
 local font = love.graphics.newFont(12, "mono")
+font:setFilter("nearest")
 local framerate = love.graphics.newText(font, {0.8, 0.8, 0.8, 1.0, "0.00ms"})
 
 local countdown = 0

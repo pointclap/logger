@@ -75,6 +75,7 @@ subscribe_message("new-player", function(msg)
     players[id].uniqueid = tonumber(msg.uniqueid)
     players[id].username_text = love.graphics.newText(font, {{colour.r, colour.g, colour.b},
                                                              msg.username .. "#" .. msg.uniqueid})
+    players[id].contact_sound = love.audio.newSource("assets/audio/toot.wav", "static")
 
     set_model(id, "character")
 end)
