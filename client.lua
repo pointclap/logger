@@ -24,7 +24,7 @@ end
 
 local function update(dt)
 	if connection then
-		for _, event in pairs(connection:events()) do
+		for event in connection:events() do
 			if event.type == "receive" then
 				messages.incoming(event.data)
 	

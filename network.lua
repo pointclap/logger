@@ -6,26 +6,23 @@ local server_connection_class = {}
 
 -- Get all new events from the server
 function server_connection_class:events()
-    local all_events = {}
-
-    local event = self.client:service()
-    while event do
-        if event.type == "receive" then
-            -- Messages are encoded using a key1=value1;key2=value2;
-            -- format. Decode the format into a flat table instead.
-            decoded_message = {}
-            for k, v in event.data:gmatch("([^=]+)=([^;]+);") do
-                decoded_message[k] = v
+    return function(client, old_event)
+        local event = self.client:service()
+        if event then
+            if event.type == "receive" then
+                -- Messages are encoded using a key1=value1;key2=value2;
+                -- format. Decode the format into a flat table instead.
+                decoded_message = {}
+                for k, v in event.data:gmatch("([^=]+)=([^;]+);") do
+                    decoded_message[k] = v
+                end
+    
+                event.data = decoded_message
             end
 
-            event.data = decoded_message
+            return event
         end
-
-        table.insert(all_events, event)
-        event = self.client:service()
-    end
-
-    return all_events
+    end, self.client, nil
 end
 
 function server_connection_class:send(data)
