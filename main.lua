@@ -38,3 +38,7 @@ function love.quit()
         client.quit()
     end
 end
+
+function love.keyreleased(key, scancode, isrepeat)
+	client.keyreleased(key, scancode, isrepeat)
+end
