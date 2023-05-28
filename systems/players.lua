@@ -89,6 +89,7 @@ subscribe_message("update-position", function(msg)
         local player_id = tonumber(msg.id)
         if players[player_id] and players[player_id].body then
             players[player_id].body:setPosition(tonumber(msg.x), tonumber(msg.y))
+            players[player_id].body:setLinearVelocity(tonumber(msg.vx), tonumber(msg.vy))
             players[player_id].mouseX = tonumber(msg.mouseX)
             players[player_id].mouseY = tonumber(msg.mouseY)
         end
@@ -133,13 +134,21 @@ end
 
 function send_updated_position(dt)
     if localplayer then
-        local x, y = 
+        local x, y = players[localplayer].body:getPosition()
+        local vx, vy = players[localplayer].body:getLinearVelocity()
 
         connection:send({
             cmd = "update-position",
             id = localplayer,
             x = x,
             y = y,
+            vx = vx,
+            vy = vy,
+        })
+
+        connection:send({
+            cmd = "update-mouse",
+            id = localplayer,
             mouseX = players[localplayer].mouseX,
             mouseY = players[localplayer].mouseY
         })
