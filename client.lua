@@ -41,7 +41,7 @@ local function update(dt)
 			end
 		end
 	end
-
+	
 	update_physics(dt)
 	update_animation(dt)
 
@@ -62,7 +62,7 @@ local function draw()
 	local width, height = love.graphics.getDimensions()
 	love.graphics.push()
 		if localplayer and players[localplayer] then
-			love.graphics.translate(-players[localplayer].model.x + width / 2, -players[localplayer].model.y + height / 2)
+			love.graphics.translate(-players[localplayer].animated.x + width / 2, -players[localplayer].animated.y + height / 2)
 		end
 
 		render_model()
