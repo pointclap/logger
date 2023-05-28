@@ -73,7 +73,8 @@ subscribe_message("new-player", function(msg)
     players[id].mouseY = 0
     players[id].username = msg.username
     players[id].uniqueid = tonumber(msg.uniqueid)
-    players[id].username_text = love.graphics.newText(font, {{colour.r, colour.g, colour.b},
+    players[id].username_text = msg.username .. "#" .. msg.uniqueid
+    players[id].drawable_text = love.graphics.newText(font, {{colour.r, colour.g, colour.b},
                                                              msg.username .. "#" .. msg.uniqueid})
     players[id].contact_sound = love.audio.newSource("assets/audio/toot.wav", "static")
 
@@ -162,8 +163,13 @@ function render_username(player)
     if player.interpolated_position and player.username and player.uniqueid then
         love.graphics.push()
         -- love.graphics.scale(fontSize)
-        local w, h = player.username_text:getDimensions()
-        love.graphics.draw(player.username_text, player.interpolated_position.x - w / 2, player.interpolated_position.y - 30)
+        player.drawable_text:set(player.username_text)
+        local w, h = player.drawable_text:getDimensions()
+        love.graphics.draw(player.drawable_text, player.interpolated_position.x - w / 2, player.interpolated_position.y - 30)
+        player.drawable_text:set("int x: " .. player.interpolated_position.x)
+        love.graphics.draw(player.drawable_text, player.interpolated_position.x - w / 2, player.interpolated_position.y + 30)
+        player.drawable_text:set("int y: " .. player.interpolated_position.y)
+        love.graphics.draw(player.drawable_text, player.interpolated_position.x - w / 2, player.interpolated_position.y + 40)
         love.graphics.pop()
     end
 end
@@ -182,16 +188,28 @@ function local_render()
 end
 
 function render_cursors()
+    if not players[localplayer] then return end
+
+    local x = players[localplayer].interpolated_position.x
+    local y = players[localplayer].interpolated_position.y
+
     for id, player in pairs(players) do
-        love.graphics.setColor(player.colour.r, player.colour.g, player.colour.b)
+        love.graphics.setColor(player.colour.r, player.colour.g, player.colour.b)    
         if player.mouseX and player.mouseY then
-            if id == localplayer then
-                love.graphics.circle("fill", player.mouseX, player.mouseY, 3)
-            else
-                if player.model then
-                    love.graphics.circle("fill", player.model.x + player.mouseX, player.model.y + player.mouseY, 3)
-                end
+            local mouseX = player.mouseX
+            local mouseY = player.mouseY
+
+            if id ~= localplayer and player.interpolated_position then
+                mouseX = mouseX + player.interpolated_position.x - x
+                mouseY = mouseY + player.interpolated_position.y - y
             end
+            
+            love.graphics.circle("fill", mouseX, mouseY, 3)
+
+            player.drawable_text:set("mouseX: " .. player.mouseX)
+            love.graphics.draw(player.drawable_text, mouseX, mouseY + 10)
+            player.drawable_text:set("mouseY: " .. player.mouseY)
+            love.graphics.draw(player.drawable_text, mouseX, mouseY + 20)
         end
     end
 end
