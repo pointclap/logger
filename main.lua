@@ -6,6 +6,7 @@ function love.load(args)
     if not args[1] then
         is_server = true
         server.load(args)
+        love.window.close()
         -- client.load({
         --     "localhost",
         --     "local-user"
