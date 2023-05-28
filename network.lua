@@ -42,7 +42,7 @@ function server_connection_class:close()
     self.client:destroy()
 end
 
-function connect(ip_address)
+local function connect(ip_address)
     local client = enet.host_create()
     local peer = client:connect(ip_address .. ":27031")
 
@@ -51,3 +51,7 @@ function connect(ip_address)
         peer = peer,
     }, {__index = server_connection_class})
 end
+
+return {
+    connect = connect
+}

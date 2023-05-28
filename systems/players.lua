@@ -48,7 +48,7 @@ local function hsl2rgb(h, s, l, a)
     }
 end
 
-subscribe_message("new-player", function(msg)
+messages.subscribe("new-player", function(msg)
     local id = tonumber(msg.id)
     if msg.username == username and localplayer == nil then
         print("localplayer not set, assigning " .. msg.id)
@@ -81,12 +81,12 @@ subscribe_message("new-player", function(msg)
     set_model(id, "character")
 end)
 
-subscribe_message("player-left", function(msg)
+messages.subscribe("player-left", function(msg)
     players[tonumber(msg.id)] = nil
     print("Player " .. msg.username .. "#" .. msg.uniqueid .. " left!")
 end)
 
-subscribe_message("update-position", function(msg)
+messages.subscribe("update-position", function(msg)
     if tonumber(msg.id) ~= localplayer then
         local player_id = tonumber(msg.id)
         if players[player_id] and players[player_id].body then
@@ -98,7 +98,7 @@ subscribe_message("update-position", function(msg)
     end
 end)
 
-subscribe_message("update-mouse", function(msg)
+messages.subscribe("update-mouse", function(msg)
     if tonumber(msg.id) ~= localplayer then
         local player_id = tonumber(msg.id)
         players[player_id].mouseX = tonumber(msg.mouseX)

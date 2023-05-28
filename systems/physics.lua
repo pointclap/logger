@@ -3,13 +3,7 @@ local velocity_iterations = 8
 local position_iterations = 3
 local drag_coefficient = 5
 
-function init_physics()
-    love.physics.setMeter(64)
-    world = love.physics.newWorld(0, 0, true)
-    world:setCallbacks(collision_callback)
-end
-
-function collision_callback(a, b, contact)
+local function collision_callback(a, b, contact)
     local a, b = a:getUserData(), b:getUserData()
 
     for _, player_id in pairs({a, b}) do
@@ -19,21 +13,13 @@ function collision_callback(a, b, contact)
     end
 end
 
-local accumulated_deltatime = 0
-local fixed_timestep = 0.008
-function update_physics(dt)
-    accumulated_deltatime = accumulated_deltatime + dt
-
-    while accumulated_deltatime > fixed_timestep do
-        player_movement(fixed_timestep)
-        accumulated_deltatime = accumulated_deltatime - fixed_timestep
-        world:update(fixed_timestep, velocity_iterations, position_iterations)
-        apply_drag(fixed_timestep)
-        interpolate_position(fixed_timestep)
-    end
+local function init()
+    love.physics.setMeter(64)
+    world = love.physics.newWorld(0, 0, true)
+    world:setCallbacks(collision_callback)
 end
 
-function apply_drag(dt)
+local function apply_drag(dt)
     for _, player in pairs(players) do
         if player.body then
             local x, y = player.body:getLinearVelocity()
@@ -42,7 +28,7 @@ function apply_drag(dt)
     end
 end
 
-function interpolate_position(dt)
+local function interpolate_position(dt)
     for _, player in pairs(players) do
         if player.body and player.interpolated_position then
             local x, y = player.body:getPosition()
@@ -56,8 +42,21 @@ function interpolate_position(dt)
     end
 end
 
+local accumulated_deltatime = 0
+local fixed_timestep = 0.008
+local function update(dt)
+    accumulated_deltatime = accumulated_deltatime + dt
 
-subscribe_message("new-player", function(msg)
+    while accumulated_deltatime > fixed_timestep do
+        player_movement(fixed_timestep)
+        accumulated_deltatime = accumulated_deltatime - fixed_timestep
+        world:update(fixed_timestep, velocity_iterations, position_iterations)
+        apply_drag(fixed_timestep)
+        interpolate_position(fixed_timestep)
+    end
+end
+
+messages.subscribe("new-player", function(msg)
     local id = tonumber(msg.id);
 
     if players[id] == nil then
@@ -78,3 +77,8 @@ subscribe_message("new-player", function(msg)
 
     players[id].body = body
 end)
+
+return {
+    init = init,
+    update = update
+}

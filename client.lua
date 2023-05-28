@@ -1,10 +1,11 @@
 local debug = require("systems.debug")
+messages = require("messages")
 
-require("network")
-require("messages")
+local network = require("network")
+local physics = require("systems.physics")
+local models = require("systems.models")
+
 require("systems.players")
-require("systems.physics")
-require("systems.models")
 
 players = {}
 username = nil
@@ -15,9 +16,9 @@ next_update = 0
  
 local function load(args)
 	username = args[2]
-	connection = connect(args[1]);
+	connection = network.connect(args[1]);
 
-	init_physics()
+	physics.init()
 end
 
 local delta_time = 0
@@ -28,7 +29,7 @@ local function update(dt)
 	if connection then
 		for _, event in pairs(connection:events()) do
 			if event.type == "receive" then
-				incoming_message(event.data)
+				messages.incoming(event.data)
 	
 			elseif event.type == "connect" then
 				print("connected to server")
@@ -43,8 +44,8 @@ local function update(dt)
 		end
 	end
 	
-	update_physics(dt)
-	update_animation(dt)
+	physics.update(dt)
+	models.update(dt)
 
 	if cur_time > next_update then
 		next_update = cur_time + tick_rate
@@ -68,7 +69,7 @@ local function draw()
 			love.graphics.translate(-players[localplayer].interpolated_position.x + width / 2, -players[localplayer].interpolated_position.y + height / 2)
 		end
 
-		render_model()
+		models.draw()
 		local_render()
 		debug.draw_local()
 	love.graphics.pop()

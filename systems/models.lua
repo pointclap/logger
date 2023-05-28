@@ -103,7 +103,7 @@ function set_model(player_id, model)
     }
 end
 
-function update_animation(dt)
+local function update(dt)
     for _, player in pairs(players) do
         if player.animated then
             if player.animated.model.animation_selector then
@@ -126,7 +126,7 @@ function update_animation(dt)
     end
 end
 
-function render_model()
+local function draw()
     for _, player in pairs(players) do
         love.graphics.setColor(1, 1, 1, 1)
         if player.animated then
@@ -137,3 +137,8 @@ function render_model()
         end
     end
 end
+
+return {
+    update = update,
+    draw = draw
+}
