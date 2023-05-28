@@ -78,7 +78,7 @@ messages.subscribe("new-player", function(msg)
                                                              msg.username .. "#" .. msg.uniqueid})
     players[id].contact_sound = love.audio.newSource("assets/audio/toot.wav", "static")
 
-    set_model(id, "character")
+    models.set_model(id, "character")
 end)
 
 messages.subscribe("player-left", function(msg)

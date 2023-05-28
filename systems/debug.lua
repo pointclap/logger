@@ -4,7 +4,7 @@ font:setFilter("nearest")
 local framerate = love.graphics.newText(font, {0.8, 0.8, 0.8, 1.0, "0.00ms"})
 
 local countdown = 0
-local function update_debug_information(dt)
+hooks.add("update",  function(dt)
     if not debug_mode then return end
 
     countdown = countdown - dt
@@ -12,9 +12,9 @@ local function update_debug_information(dt)
         countdown = 0.1
         framerate:set(math.floor(dt * 100000) / 100 .. "ms")
     end
-end
+end)
 
-local function render_debug_information()
+hooks.add("draw_local", function()
     if not debug_mode then return end
     love.graphics.setColor(0.8, 0.8, 0.8, 1.0)
     love.graphics.draw(framerate, 20, 20)
@@ -39,7 +39,7 @@ local function render_debug_information()
     end
 end
 
-local function render_debug_bodies()
+hooks.add("draw_world", function()
     if not debug_mode then return end
 
     for _, player in pairs(players) do
@@ -64,17 +64,10 @@ local function render_debug_bodies()
             love.graphics.pop()
         end
     end
-end
+end)
 
-local function keyreleased(key, scancode, isrepeat)
+hooks.add("keyreleased", function(key, scancode, isrepeat)
     if key == "f1" then
         debug_mode = not debug_mode
     end
-end
-
-return {
-    keyreleased = keyreleased,
-    update = update_debug_information,
-    draw_local = render_debug_bodies,
-    draw_global = render_debug_information,
-}
+end)

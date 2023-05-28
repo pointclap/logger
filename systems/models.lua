@@ -92,7 +92,7 @@ local models = {
     character = character
 }
 
-function set_model(player_id, model)
+local function set_model(player_id, model)
     local model = models[model]
 
     players[player_id].animated = {
@@ -103,7 +103,7 @@ function set_model(player_id, model)
     }
 end
 
-local function update(dt)
+hooks.add("update", function(dt)
     for _, player in pairs(players) do
         if player.animated then
             if player.animated.model.animation_selector then
@@ -124,9 +124,9 @@ local function update(dt)
             end
         end
     end
-end
+end)
 
-local function draw()
+hooks.add("draw_world", function()
     for _, player in pairs(players) do
         love.graphics.setColor(1, 1, 1, 1)
         if player.animated then
@@ -136,9 +136,8 @@ local function draw()
             love.graphics.draw(player.animated.model.image, quad, player.interpolated_position.x - w / 2, player.interpolated_position.y - h / 2)
         end
     end
-end
+end)
 
 return {
-    update = update,
-    draw = draw
+    set_model = set_model
 }

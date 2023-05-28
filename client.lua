@@ -1,9 +1,9 @@
-local debug = require("systems.debug")
+hooks = require("systems.hooks")
 messages = require("messages")
-
+local debug = require("systems.debug")
 local network = require("network")
 local physics = require("systems.physics")
-local models = require("systems.models")
+models = require("systems.models")
 
 require("systems.players")
 
@@ -18,14 +18,13 @@ local function load(args)
 	username = args[2]
 	connection = network.connect(args[1]);
 
-	physics.load()
+	hooks.call("load", args)
 end
 
-local delta_time = 0
+local accumulated_deltatime = 0
+local fixed_timestep = 0.008
 local function update(dt)
-	delta_time = dt
 	cur_time = cur_time + dt
-
 	if connection then
 		for _, event in pairs(connection:events()) do
 			if event.type == "receive" then
@@ -44,15 +43,18 @@ local function update(dt)
 		end
 	end
 	
-	physics.update(dt)
-	models.update(dt)
+	hooks.call("update", dt)
+
+	accumulated_deltatime = accumulated_deltatime + dt
+	while accumulated_deltatime > fixed_timestep do
+		hooks.call("fixed_timestep", fixed_timestep)
+		accumulated_deltatime = accumulated_deltatime - fixed_timestep
+	end
 
 	if cur_time > next_update then
 		next_update = cur_time + tick_rate
 		send_updated_position(dt)
 	end
-
-	debug.update(dt)
 end
 
 local function quit()
@@ -64,22 +66,21 @@ end
 
 local function draw()
 	local width, height = love.graphics.getDimensions()
-	love.graphics.push()
 		if localplayer and players[localplayer] then
+			love.graphics.push()
 			love.graphics.translate(-players[localplayer].interpolated_position.x + width / 2, -players[localplayer].interpolated_position.y + height / 2)
+			hooks.call("draw_world")
+			love.graphics.pop()
 		end
 
-		models.draw()
+		hooks.call("draw_local")
 		local_render()
-		debug.draw_local()
-	love.graphics.pop()
 
 	render_cursors()
-	debug.draw_global()
 end
 
 local function keyreleased(key, scancode, isrepeat)
-	debug.keyreleased(key, scancode, isrepeat)
+	hooks.call("keyreleased", key, scancode, isrepeat)
 end
 
 return {

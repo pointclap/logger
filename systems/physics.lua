@@ -13,11 +13,11 @@ local function collision_callback(a, b, contact)
     end
 end
 
-local function load()
+hooks.add("load", function()
     love.physics.setMeter(64)
     world = love.physics.newWorld(0, 0, true)
     world:setCallbacks(collision_callback)
-end
+end)
 
 local function apply_drag(dt)
     for _, player in pairs(players) do
@@ -42,19 +42,12 @@ local function interpolate_position(dt)
     end
 end
 
-local accumulated_deltatime = 0
-local fixed_timestep = 0.008
-local function update(dt)
-    accumulated_deltatime = accumulated_deltatime + dt
-
-    while accumulated_deltatime > fixed_timestep do
+hooks.add("fixed_timestep", function(fixed_timestep)
         player_movement(fixed_timestep)
-        accumulated_deltatime = accumulated_deltatime - fixed_timestep
         world:update(fixed_timestep, velocity_iterations, position_iterations)
         apply_drag(fixed_timestep)
         interpolate_position(fixed_timestep)
-    end
-end
+end)
 
 messages.subscribe("new-player", function(msg)
     local id = tonumber(msg.id);
@@ -77,8 +70,3 @@ messages.subscribe("new-player", function(msg)
 
     players[id].body = body
 end)
-
-return {
-    load = load,
-    update = update
-}
