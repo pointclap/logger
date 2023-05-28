@@ -18,7 +18,7 @@ local function load(args)
 	username = args[2]
 	connection = network.connect(args[1]);
 
-	physics.init()
+	physics.load()
 end
 
 local delta_time = 0

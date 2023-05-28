@@ -13,7 +13,7 @@ local function collision_callback(a, b, contact)
     end
 end
 
-local function init()
+local function load()
     love.physics.setMeter(64)
     world = love.physics.newWorld(0, 0, true)
     world:setCallbacks(collision_callback)
@@ -79,6 +79,6 @@ messages.subscribe("new-player", function(msg)
 end)
 
 return {
-    init = init,
+    load = load,
     update = update
 }
