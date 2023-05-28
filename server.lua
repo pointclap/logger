@@ -25,7 +25,7 @@ local function generate_uniqueid(username)
 
     while true do
         local uniqueidused = 0
-        local newuniqueid = math.random(1, 9999)
+        newuniqueid = math.random(1, 9999)
 
         for id, ply in pairs(connected_players) do
             if ply.username == username and ply.uniqueid == newuniqueid then
@@ -75,10 +75,10 @@ local function update(dt)
             if tbl.cmd == "new-player" then
                 -- generate random 4 digit number to uniqueify each username
                 connected_players[hostevent.peer:index()] = {
-                    username = tbl.username
+                    username = tbl.username,
+                    uniqueid = generate_uniqueid(tbl.username),
                 }
 
-                connected_players[hostevent.peer:index()].uniqueid = generate_uniqueid(tbl.username)
                 print(tbl.username .. "#" .. connected_players[hostevent.peer:index()].uniqueid .. " joined")
 
                 hostevent.peer:send(encode_message({
