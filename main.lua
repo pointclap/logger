@@ -1,3 +1,4 @@
+hooks = require("hooks")
 local server = require("server")
 local client = require("client")
 local is_server = false

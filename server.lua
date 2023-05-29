@@ -1,4 +1,3 @@
-hooks = require("systems.hooks")
 messages = require("messages")
 local enet = require "enet"
 local enethost = nil

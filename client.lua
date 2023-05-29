@@ -1,4 +1,3 @@
-hooks = require("systems.hooks")
 messages = require("messages")
 local debug = require("systems.debug")
 local network = require("network")
