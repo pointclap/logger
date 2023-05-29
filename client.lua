@@ -5,6 +5,9 @@ local network = require("network")
 local physics = require("systems.physics")
 models = require("systems.models")
 
+local accumulated_deltatime = 0
+local fixed_timestep = 0.008
+
 require("systems.players")
 
 players = {}
@@ -19,8 +22,6 @@ local function load(args)
 	hooks.call("load", args)
 end
 
-local accumulated_deltatime = 0
-local fixed_timestep = 0.008
 local function update(dt)
 	if connection then
 		for _, event in pairs(connection:events()) do

@@ -1,14 +1,31 @@
+hooks = require("systems.hooks")
+messages = require("messages")
 local enet = require "enet"
 local enethost = nil
 local connected_players = {}
 local curtime = 0.0
 local nextupdate = 0.0
 local TICK_RATE = 1 / 60.0
-local entities = {}
+
+local accumulated_deltatime = 0
+local fixed_timestep = 0.008
+
+entities = {}
+entid = 0
+local physics = require("systems.physics")
+
+local function next_entity_id()
+    entid = entid + 1
+    return entid
+end
 
 local function load(args)
+	hooks.call("load", args)
     enethost = enet.host_create("*:27031")
     print("listening..")
+
+    -- create a box at 50,50
+    physics.spawnBox(next_entity_id(), 50, 50, 20)
 end
 
 local function encode_message(msg)
@@ -65,11 +82,15 @@ local function update(dt)
             end
 
         elseif hostevent.type == "receive" then
-            print("Received message: ", hostevent.data, hostevent.peer)
+            --print("Received message: ", hostevent.data, hostevent.peer)
 
             tbl = {}
             for k, v in hostevent.data:gmatch("([^=]+)=([^;]+);") do
                 tbl[k] = v
+            end
+
+            if tbl.cmd ~= "update-mouse" and tbl.cmd ~= "update-position" then
+                print("Received message: ", hostevent.data, hostevent.peer)
             end
 
             if tbl.cmd == "new-player" then
@@ -103,6 +124,19 @@ local function update(dt)
                     end
                 end
 
+                -- and the boxes
+                for ent_id, ent in pairs(entities) do
+                    if ent.body then
+                        hostevent.peer:send(encode_message({
+                            cmd = "spawn-box",
+                            ent_id = ent_id,
+                            pos_x = ent.body.x,
+                            pos_y = ent.body.y,
+                            size = 20 -- to do: send vert details to/from server 
+                        }))
+                    end
+                end
+
                 -- Tell all players about the new player
                 enethost:broadcast(encode_message({
                     cmd = "new-player",
@@ -122,6 +156,24 @@ local function update(dt)
             else
                 enethost:broadcast(hostevent.data)
             end
+        end
+    end
+    
+	accumulated_deltatime = accumulated_deltatime + dt
+	while accumulated_deltatime > fixed_timestep do
+		hooks.call("fixed_timestep", fixed_timestep)
+		accumulated_deltatime = accumulated_deltatime - fixed_timestep
+	end
+
+    -- Now send the world data to all players
+    for ent_id, ent in pairs(entities) do
+        if ent.body then
+            enethost:broadcast(encode_message({
+                cmd = "update-world",
+                ent_id = ent_id,
+                x = ent.body.x,
+                y = ent.body.y
+            }))
         end
     end
 end

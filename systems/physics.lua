@@ -19,11 +19,44 @@ hooks.add("load", function()
     world:setCallbacks(collision_callback)
 end)
 
+local function spawnBox(ent_id, pos_x, pos_y, size)
+    local body = love.physics.newBody(world, pos_x, pos_y, "dynamic");
+    local shape = love.physics.newPolygonShape(-size/2, -size,
+                                                size/2, -size/2,
+                                                size/2,  size/2,
+                                               -size/2,  size/2)
+    local fixture = love.physics.newFixture(body, shape, 5)
+    fixture:setUserData(ent_id)
+    entities[ent_id] = {}
+    entities[ent_id].body = body
+    entities[ent_id].vertices = {shape:getPoints()}
+    for k,v in pairs(entities[ent_id].vertices) do
+        print(k .. ": " .. v)
+    end
+    
+    if is_server then
+        enethost:broadcast(encode_message({
+            cmd = "spawn-box",
+            ent_id = ent_id,
+            pos_x = pos_x,
+            pos_y = pos_y,
+            size = size
+        }))
+    end
+end
+
 local function apply_drag(dt)
     for _, player in pairs(players) do
         if player.body then
             local x, y = player.body:getLinearVelocity()
             player.body:applyForce(-x * drag_coefficient, -y * drag_coefficient)
+        end
+    end
+
+    for ent_id, ent in pairs(entities) do
+        if ent.body then
+            local x, y = ent.body:getLinearVelocity()
+            ent.body:applyForce(-x * drag_coefficient, -y * drag_coefficient)
         end
     end
 end
@@ -48,6 +81,21 @@ hooks.add("fixed_timestep", function(fixed_timestep)
     interpolate_position(fixed_timestep)
 end)
 
+messages.subscribe("spawn-box", function(msg)
+    print("spawning a box!")
+    spawnBox(msg.ent_id, msg.pos_x, msg.pos_y, msg.size)
+end)
+
+messages.subscribe("update-world", function(msg)
+    local ent_id = tonumber(msg.ent_id)
+    if not entities[ent_id] then return end
+    
+    if entities[ent_id].body then
+        entities[ent_id].body.x = tonumber(msg.x)
+        entities[ent_id].body.y = tonumber(msg.y)
+    end
+end)
+
 messages.subscribe("new-player", function(msg)
     local id = tonumber(msg.id);
 
@@ -69,3 +117,37 @@ messages.subscribe("new-player", function(msg)
 
     players[id].body = body
 end)
+
+hooks.add("draw_world", function()
+    if is_server then return end
+    
+    
+    for ent_id, ent in pairs(entities) do
+        love.graphics.setColor({1, 1, 1})
+
+        if ent.body then
+            local x, y = ent.body:getPosition()
+
+            for _, fixture in pairs(ent.body:getFixtures()) do
+                local shape = fixture:getShape()
+
+                if shape:getType() == "polygon" and ent.vertices then
+                    local verts = {}
+                    for k,v in pairs(ent.vertices) do
+                        if k % 2 == 0 then
+                            verts[k] = v + x
+                        else
+                            verts[k] = v + y
+                        end
+                    end
+
+                    love.graphics.polygon("line", verts)
+                end
+            end
+        end
+    end
+end)
+
+return {
+    spawnBox = spawnBox
+}
