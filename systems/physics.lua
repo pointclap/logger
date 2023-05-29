@@ -21,18 +21,19 @@ end)
 
 local function spawnBox(ent_id, pos_x, pos_y, size)
     local body = love.physics.newBody(world, pos_x, pos_y, "dynamic");
-    local shape = love.physics.newPolygonShape(-size/2, -size,
+    local shape = love.physics.newPolygonShape(-size/2, -size/2,
                                                 size/2, -size/2,
                                                 size/2,  size/2,
                                                -size/2,  size/2)
     local fixture = love.physics.newFixture(body, shape, 5)
     fixture:setUserData(ent_id)
     entities[ent_id] = {}
+    entities[ent_id].interpolated_position = {
+        x = pos_x,
+        y = pos_y
+    }
     entities[ent_id].body = body
     entities[ent_id].vertices = {shape:getPoints()}
-    for k,v in pairs(entities[ent_id].vertices) do
-        print(k .. ": " .. v)
-    end
     
     if is_server then
         enethost:broadcast(encode_message({
@@ -71,6 +72,18 @@ local function interpolate_position(dt)
 
             player.interpolated_position.x = player.interpolated_position.x + x_distance * dt * 20.0
             player.interpolated_position.y = player.interpolated_position.y + y_distance * dt * 20.0
+        end
+    end
+
+    for ent_id, ent in pairs(entities) do
+        if ent.body and ent.interpolated_position and ent.interpolated_position.x and ent.interpolated_position.y then
+            local x, y = ent.body:getPosition()
+
+            local x_distance = x - ent.interpolated_position.x
+            local y_distance = y - ent.interpolated_position.y
+
+            ent.interpolated_position.x = ent.interpolated_position.x + x_distance * dt * 20.0
+            ent.interpolated_position.y = ent.interpolated_position.y + y_distance * dt * 20.0
         end
     end
 end
@@ -120,7 +133,6 @@ end)
 
 hooks.add("draw_world", function()
     if is_server then return end
-    
     
     for ent_id, ent in pairs(entities) do
         love.graphics.setColor({1, 1, 1})
