@@ -41,7 +41,6 @@ messages.subscribe("disconnect", function(peer, msg)
             network.broadcast({
                 cmd = "player-left",
                 username = player.username,
-                uniqueid = player.uniqueid,
                 id = id
             })
 
@@ -54,7 +53,6 @@ end)
 messages.subscribe("new-player", function(peer, msg)
     player_id, player = entities.spawn()
     player.username = msg.username
-    player.uniqueid = 69
     player.peer = peer
     player_index[peer:index()] = player_id
 
@@ -71,7 +69,6 @@ messages.subscribe("new-player", function(peer, msg)
             peer:send({
                 cmd = "new-player",
                 username = existing_player.username,
-                uniqueid = existing_player.uniqueid,
                 id = id
             })
         end
@@ -102,7 +99,6 @@ messages.subscribe("new-player", function(peer, msg)
     network.broadcast({
         cmd = "new-player",
         username = player.username,
-        uniqueid = player.uniqueid,
         id = player_id
     })
 end)
@@ -149,7 +145,6 @@ messages.subscribe("player-left", function(peer, msg)
     network.broadcast({
         cmd = "player-left",
         username = player.username,
-        uniqueid = player.uniqueid,
         id = player_id
     })
 end)

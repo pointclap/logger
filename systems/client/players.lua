@@ -61,7 +61,7 @@ end)
 messages.subscribe("new-player", function(peer, msg)
     local id = tonumber(msg.id)
 
-    log.info("New player " .. msg.username .. "#" .. msg.uniqueid .. " joined!")
+    log.info("New player " .. msg.username .. " joined!")
 
     local player = entities.get(id)
 
@@ -76,7 +76,6 @@ messages.subscribe("new-player", function(peer, msg)
     player.mouseX = 0
     player.mouseY = 0
     player.username = msg.username
-    player.uniqueid = tonumber(msg.uniqueid)
 
     player.interpolated_position = {
         x = 0,
@@ -91,11 +90,11 @@ messages.subscribe("new-player", function(peer, msg)
     player.body = body
 
     models.set_model(id, "character")
-    labels.set_label(id, msg.username .. "#" .. msg.uniqueid)
+    labels.set_label(id, msg.username)
 end)
 
 messages.subscribe("player-left", function(peer, msg)
-    log.info("Player " .. msg.username .. "#" .. msg.uniqueid .. " left!")
+    log.info("Player " .. msg.username .. " left!")
 end)
 
 messages.subscribe("update-position", function(peer, msg)
