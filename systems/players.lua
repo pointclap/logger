@@ -58,7 +58,7 @@ end)
 
 messages.subscribe("assign-localplayer", function(peer, msg)
     id = tonumber(msg.id)
-    log.debug("localplayer not set, assigning " .. id)
+    log.debug("Assigning localplayer = " .. id)
     localplayer = id
 end)
 

@@ -25,8 +25,11 @@ end)
 
 local function spawnBox(ent_id, pos_x, pos_y, size)
     local body = love.physics.newBody(world, pos_x, pos_y, "dynamic");
-    local shape = love.physics.newPolygonShape(-size / 2, -size / 2, size / 2, -size / 2, size / 2, size / 2, -size / 2,
-        size / 2)
+    local shape = love.physics.newPolygonShape(-size / 2, -size / 2,
+                                                size / 2, -size / 2,
+                                                size / 2,  size / 2,
+                                               -size / 2,  size / 2)
+
     local fixture = love.physics.newFixture(body, shape, 5)
     fixture:setUserData(ent_id)
     entities[ent_id] = {}
@@ -98,15 +101,13 @@ hooks.add("fixed_timestep", function(fixed_timestep)
 end)
 
 messages.subscribe("spawn-box", function(peer, msg)
-    log.info("spawning a box!")
-    spawnBox(msg.ent_id, msg.pos_x, msg.pos_y, msg.size)
+    spawnBox(tonumber(msg.ent_id), tonumber(msg.pos_x), tonumber(msg.pos_y), tonumber(msg.size))
 end)
 
 messages.subscribe("update-world", function(peer, msg)
     local ent_id = tonumber(msg.ent_id)
-    if not entities[ent_id] then
-        return
-    end
+
+    if not entities[ent_id] then return end
 
     if entities[ent_id].body then
         entities[ent_id].body:setPosition(tonumber(msg.x), tonumber(msg.y))

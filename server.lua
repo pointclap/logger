@@ -70,24 +70,28 @@ messages.subscribe("new-player", function(peer, msg)
 
     -- Tell the new player about all other players
     for id, ply in pairs(connected_players) do
-        peer:send({
-            cmd = "new-player",
-            username = ply.username,
-            uniqueid = ply.uniqueid,
-            id = id
-        })
+        if id ~= peer:index() then
+            peer:send({
+                cmd = "new-player",
+                username = ply.username,
+                uniqueid = ply.uniqueid,
+                id = id
+            })
+        end
     end
 
     -- Tell new player about all entities and their positions
     for ent_id, ent in pairs(entities) do
         if ent.body then
             local x, y = ent.body:getPosition()
+            local size = 20
+            
             peer:send({
                 cmd = "spawn-box",
                 ent_id = ent_id,
                 pos_x = x,
                 pos_y = y,
-                size = 20 -- to do: send vert details to/from server 
+                size = size -- to do: send vert details to/from server 
             })
         end
     end
