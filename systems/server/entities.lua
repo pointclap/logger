@@ -1,4 +1,3 @@
-local entities = {}
 local last_entity_id = 0
 local entities = require("systems.entities")
 
