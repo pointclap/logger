@@ -48,7 +48,7 @@ local function hsl2rgb(h, s, l, a)
     }
 end
 
-messages.subscribe("new-player", function(msg)
+messages.subscribe("new-player", function(peer, msg)
     local id = tonumber(msg.id)
     if msg.username == username and localplayer == nil then
         print("localplayer not set, assigning " .. msg.id)
@@ -81,12 +81,12 @@ messages.subscribe("new-player", function(msg)
     models.set_model(id, "character")
 end)
 
-messages.subscribe("player-left", function(msg)
+messages.subscribe("player-left", function(peer, msg)
     players[tonumber(msg.id)] = nil
     print("Player " .. msg.username .. "#" .. msg.uniqueid .. " left!")
 end)
 
-messages.subscribe("update-position", function(msg)
+messages.subscribe("update-position", function(peer, msg)
     if tonumber(msg.id) ~= localplayer then
         local player_id = tonumber(msg.id)
         if players[player_id] and players[player_id].body then
@@ -98,7 +98,7 @@ messages.subscribe("update-position", function(msg)
     end
 end)
 
-messages.subscribe("update-mouse", function(msg)
+messages.subscribe("update-mouse", function(peer, msg)
     if tonumber(msg.id) ~= localplayer then
         local player_id = tonumber(msg.id)
         players[player_id].mouseX = tonumber(msg.mouseX)
@@ -142,7 +142,7 @@ hooks.add("update", function(dt)
             local x, y = players[localplayer].body:getPosition()
             local vx, vy = players[localplayer].body:getLinearVelocity()
 
-            connection:send({
+            network.broadcast({
                 cmd = "update-position",
                 id = localplayer,
                 x = x,
@@ -151,7 +151,7 @@ hooks.add("update", function(dt)
                 vy = vy
             })
 
-            connection:send({
+            network.broadcast({
                 cmd = "update-mouse",
                 id = localplayer,
                 mouseX = players[localplayer].mouseX,

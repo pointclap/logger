@@ -1,6 +1,4 @@
-messages = require("messages")
 local debug = require("systems.debug")
-local network = require("network")
 local physics = require("systems.physics")
 models = require("systems.models")
 
@@ -12,12 +10,11 @@ require("systems.players")
 
 players = {}
 username = nil
-connection = nil
 tick_rate = 1 / 10
 
 local function load(args)
     username = args[2]
-    connection = network.connect(args[1]);
+    network.connect(args[1]);
 
     hooks.call("load", args)
 
@@ -25,24 +22,6 @@ local function load(args)
 end
 
 local function update(dt)
-    if connection then
-        for event in connection:events() do
-            if event.type == "receive" then
-                messages.incoming(event.data)
-
-            elseif event.type == "connect" then
-                print("connected to server")
-                connection:send({
-                    cmd = "new-player",
-                    username = username
-                })
-
-            elseif event.type == "disconnected" then
-                print("disconnected")
-            end
-        end
-    end
-
     hooks.call("update", dt)
 
     accumulated_deltatime = accumulated_deltatime + dt
@@ -53,10 +32,9 @@ local function update(dt)
 end
 
 local function quit()
-    connection:send({
+    network.broadcast({
         cmd = "player-left"
     })
-    connection:close()
 end
 
 local function draw()

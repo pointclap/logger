@@ -36,13 +36,13 @@ local function spawnBox(ent_id, pos_x, pos_y, size)
     entities[ent_id].vertices = {shape:getPoints()}
     
     if is_server then
-        enethost:broadcast(encode_message({
+        enethost:broadcast({
             cmd = "spawn-box",
             ent_id = ent_id,
             pos_x = pos_x,
             pos_y = pos_y,
             size = size
-        }))
+        })
     end
 end
 
@@ -94,12 +94,12 @@ hooks.add("fixed_timestep", function(fixed_timestep)
     interpolate_position(fixed_timestep)
 end)
 
-messages.subscribe("spawn-box", function(msg)
+messages.subscribe("spawn-box", function(peer, msg)
     print("spawning a box!")
     spawnBox(msg.ent_id, msg.pos_x, msg.pos_y, msg.size)
 end)
 
-messages.subscribe("update-world", function(msg)
+messages.subscribe("update-world", function(peer, msg)
     local ent_id = tonumber(msg.ent_id)
     if not entities[ent_id] then return end
     
@@ -109,7 +109,7 @@ messages.subscribe("update-world", function(msg)
     end
 end)
 
-messages.subscribe("new-player", function(msg)
+messages.subscribe("new-player", function(peer, msg)
     local id = tonumber(msg.id);
 
     if players[id] == nil then

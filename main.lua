@@ -1,4 +1,6 @@
 hooks = require("hooks")
+messages = require("messages")
+network = require("network")
 local server = require("server")
 local client = require("client")
 local is_server = false

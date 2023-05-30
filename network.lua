@@ -1,54 +1,57 @@
 local enet = require "enet"
 
--- "Connection" class used for sending
--- and receiving data from the server.
-local server_connection_class = {}
-
--- Get all new events from the server
-function server_connection_class:events()
-    return function(client, old_event)
-        local event = self.client:service()
-        if event then
-            if event.type == "receive" then
-                -- Messages are encoded using a key1=value1;key2=value2;
-                -- format. Decode the format into a flat table instead.
-                decoded_message = {}
-                for k, v in event.data:gmatch("([^=]+)=([^;]+);") do
-                    decoded_message[k] = v
-                end
-    
-                event.data = decoded_message
-            end
-
-            return event
-        end
-    end, self.client, nil
+local wrapped_peer = {}
+function wrapped_peer:send(data)
+    self.peer:send(messages.encode(data))
 end
 
-function server_connection_class:send(data)
-    local encoded = ""
-    for k, v in pairs(data) do
-        encoded = encoded .. k .. "=" .. v .. ";"
+local host = nil
+
+local function broadcast(data)
+    if host then
+        host:broadcast(messages.encode(data))
     end
-
-    self.peer:send(encoded)
-end
-
-function server_connection_class:close()
-    self.client:flush()
-    self.client:destroy()
 end
 
 local function connect(ip_address)
-    local client = enet.host_create()
-    local peer = client:connect(ip_address .. ":27031")
-
-    return setmetatable({
-        client = client,
-        peer = peer,
-    }, {__index = server_connection_class})
+    -- assign global host
+    host = enet.host_create()
+    host:connect(ip_address .. ":27031")
 end
 
+local function listen()
+    host = enet.host_create("*:27031")
+end
+
+hooks.add("update", function(dt)
+    if host then
+        local event = host:service()
+        while event do
+            if event.type == "receive" then
+                -- Wrap the peer so we can do custom encoding on the transmitted data.
+                local peer = setmetatable({
+                    peer = event.peer
+                }, {
+                    __index = wrapped_peer
+                })
+
+                messages.incoming(peer, messages.decode(event.data))
+            elseif event.type == "connect" then
+                print("connected to server")
+                broadcast({
+                    cmd = "new-player",
+                    username = username
+                })
+            elseif event.type == "disconnected" then
+                print("disconnected")
+            end
+            event = host:service()
+        end
+    end
+end)
+
 return {
-    connect = connect
+    connect = connect,
+    listen = listen,
+    broadcast = broadcast
 }
