@@ -83,7 +83,8 @@ end)
 hooks.add("draw_local_pre", function()
     if localplayer then
         love.graphics.setColor(0.1, 0.4, 0.1, 1.0)
-        love.graphics.rectangle("fill", 0, 0, 800, 600)
+        local width, height = love.graphics.getDimensions()
+        love.graphics.rectangle("fill", 0, 0, width, height)
 
         grass_shader:send("offset",
             {players[localplayer].interpolated_position.x, players[localplayer].interpolated_position.y});
@@ -91,8 +92,6 @@ hooks.add("draw_local_pre", function()
         love.graphics.setShader(grass_shader)
 
         love.graphics.drawInstanced(grass_mesh, 1000, 0, 0)
-        -- love.graphics.drawInstanced(grass_mesh, 500, 10, 50)
-        -- love.graphics.drawInstanced(grass_mesh, 500, -10, -50)
 
         love.graphics.setShader()
     end
@@ -102,4 +101,8 @@ local cur_time = 0
 hooks.add("update", function(dt)
     cur_time = cur_time + dt
     grass_shader:send("time", cur_time)
+end)
+
+hooks.add("resize", function(width, height)
+    grass_shader:send("screen", {width, height});
 end)
