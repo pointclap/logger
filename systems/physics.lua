@@ -56,7 +56,7 @@ messages.subscribe("update-body", function(peer, msg)
     local entity = entities.get(tonumber(msg.id))
 
     if not entity then return end
-
+    
     if entity.body then
         entity.body:setPosition(tonumber(msg.x), tonumber(msg.y))
         entity.body:setLinearVelocity(tonumber(msg.vx), tonumber(msg.vy))

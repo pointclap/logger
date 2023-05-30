@@ -190,20 +190,12 @@ hooks.add("fixed_timestep", function(fixed_timestep)
                 local ms = 100000.0 * fixed_timestep
                 local force_x = player.move.x * ms
                 local force_y = player.move.y * ms
-                
+
                 player.body:applyForce(force_x, force_y)
             end
         end
     end
-end)
-
-hooks.add("update", function(dt)
-    curtime = curtime + dt
-    if curtime < nextupdate then
-        return
-    end
-    nextupdate = curtime + TICK_RATE
-
+    
     -- Now send the world data to all players
     for id, ent in entities.all() do
         if ent.body then
@@ -220,4 +212,13 @@ hooks.add("update", function(dt)
             })
         end
     end
+end)
+
+hooks.add("update", function(dt)
+    curtime = curtime + dt
+    if curtime < nextupdate then
+        return
+    end
+    nextupdate = curtime + TICK_RATE
+
 end)
