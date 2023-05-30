@@ -3,6 +3,7 @@ local nextupdate = 0.0
 local TICK_RATE = 1 / 60.0
 
 entities = require("systems.server.entities")
+require("systems.server.ping")
 player_index = {} -- Maps peer:index() to player entity ids
 
 local function spawnBox(pos_x, pos_y, size)

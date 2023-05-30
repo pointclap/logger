@@ -5,6 +5,7 @@ end)
 local debug = require("systems.client.debug")
 entities = require("systems.client.entities")
 models = require("systems.client.models")
+require("systems.client.pong")
 
 labels = require("systems.client.labels")
 require("systems.client.grass")
