@@ -6,7 +6,7 @@ local debug = require("systems.client.debug")
 models = require("systems.client.models")
 
 require("systems.client.grass")
-require("systems.players")
+require("systems.client.players")
 
 username = nil
 tick_rate = 1 / 10
