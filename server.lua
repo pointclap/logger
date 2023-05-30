@@ -85,7 +85,7 @@ messages.subscribe("new-player", function(peer, msg)
                 ent_id = ent_id,
                 pos_x = x,
                 pos_y = y,
-                size0 -- to do: send vert details to/from server 
+                size = 0 -- to do: send vert details to/from server 
             })
         end
     end
