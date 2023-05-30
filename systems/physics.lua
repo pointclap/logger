@@ -50,7 +50,7 @@ hooks.add("fixed_timestep", function(fixed_timestep)
     interpolate_position(fixed_timestep)
 end)
 
-messages.subscribe("update-world", function(peer, msg)
+messages.subscribe("update-body", function(peer, msg)
     local entity = entities.get(tonumber(msg.ent_id))
 
     if not entity then return end

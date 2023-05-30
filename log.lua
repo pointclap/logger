@@ -7,7 +7,7 @@ local log_levels = {
 }
 
 local log_level_names = {"trace", "debug", "info", "warn", "error"}
-local current_log_level = log_levels.trace
+local current_log_level = log_levels.debug
 
 local original_print = print
 local function log(level, ...)

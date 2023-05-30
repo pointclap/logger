@@ -103,7 +103,7 @@ messages.subscribe("new-player", function(peer, msg)
     })
 end)
 
-messages.subscribe("update-position", function(peer, msg)
+messages.subscribe("report-player-position", function(peer, msg)
     -- So right now all the players communicate to the server
     -- their position and velocity, but the server doesn't
     -- have any serverside physics body for the player, so
@@ -116,8 +116,15 @@ messages.subscribe("update-position", function(peer, msg)
     -- to physics simulation. Client can do its own thing as
     -- a means of interpolation but when the server tells the
     -- client where things really are they should be put in place
+
+    local entity = entities.get(tonumber(msg.id))
+    if entity and entity.body then
+        entity.body:setPosition(tonumber(msg.x), tonumber(msg.y))
+        entity.body:setLinearVelocity(tonumber(msg.vx), tonumber(msg.vy))
+    end
+
     network.broadcast({
-        cmd = msg.cmd,
+        cmd = "update-body",
         id = msg.id,
         x = msg.x,
         y = msg.y,

@@ -97,6 +97,7 @@ messages.subscribe("player-left", function(peer, msg)
     log.info("Player " .. msg.username .. " left!")
 end)
 
+--[[
 messages.subscribe("update-position", function(peer, msg)
     local id = tonumber(msg.id)
     if id ~= localplayer then
@@ -109,6 +110,7 @@ messages.subscribe("update-position", function(peer, msg)
         end
     end
 end)
+]]
 
 messages.subscribe("update-mouse", function(peer, msg)
     local player_id = tonumber(msg.id)
@@ -158,7 +160,7 @@ hooks.add("update", function(dt)
             local vx, vy = player.body:getLinearVelocity()
 
             network.broadcast({
-                cmd = "update-position",
+                cmd = "report-player-position",
                 id = localplayer,
                 x = x,
                 y = y,
