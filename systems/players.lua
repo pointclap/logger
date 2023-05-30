@@ -86,22 +86,13 @@ messages.subscribe("new-player", function(peer, msg)
                                                              msg.username .. "#" .. msg.uniqueid})
     players[id].contact_sound = love.audio.newSource("assets/audio/toot.wav", "static")
 
-    models.set_model(id, "character")
-end)
-
-messages.subscribe("new-player", function(peer, msg)
-    local id = tonumber(msg.id);
-
-    if players[id] == nil then
-        players[id] = {}
-    end
-
     players[id].interpolated_position = {
         x = 0,
         y = 0
     }
     
     players[id].body = physics.spawnPlayer(id)
+    models.set_model(id, "character")
 end)
 
 messages.subscribe("player-left", function(peer, msg)
@@ -196,7 +187,7 @@ local function render_username(player)
 end
 
 hooks.add("draw_world", function()
-    -- render all other plays first..
+    -- render all other players first..
     for id, player in pairs(players) do
         if id ~= localplayer then
             render_username(player)

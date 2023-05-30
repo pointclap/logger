@@ -36,6 +36,14 @@ local function spawnBox(ent_id, pos_x, pos_y, size)
     }
     entities[ent_id].body = body
     entities[ent_id].vertices = {shape:getPoints()}
+
+    --entities[ent_id].vertices = {}
+    -- local vertices = {shape:getPoints()}
+    -- for k, v in pairs(vertices) do
+    --     if k%2 == 0 then
+    --         table.insert(entities[ent_id].vertices, {x=vertices[k-1], y=vertices[k]})
+    --     end
+    -- end
 end
 
 local function spawnPlayer(player_id)
@@ -122,19 +130,21 @@ hooks.add("draw_world", function()
     for ent_id, ent in pairs(entities) do
         love.graphics.setColor({1, 1, 1})
 
-        if ent.body then
-            local x, y = ent.body:getPosition()
-
+        if ent.body and ent.interpolated_position then
+            --local x, y = ent.body:getPosition()
+            local x = ent.interpolated_position.x
+            local y = ent.interpolated_position.y
+            
             for _, fixture in pairs(ent.body:getFixtures()) do
                 local shape = fixture:getShape()
-
+                
                 if shape:getType() == "polygon" and ent.vertices then
                     local verts = {}
                     for k, v in pairs(ent.vertices) do
-                        if k % 2 == 0 then
-                            verts[k] = v + x
+                        if k%2 == 0 then
+                            verts[k] = v+y
                         else
-                            verts[k] = v + y
+                            verts[k] = v+x
                         end
                     end
 

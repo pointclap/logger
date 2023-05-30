@@ -79,11 +79,12 @@ messages.subscribe("new-player", function(peer, msg)
     -- Tell new player about all entities and their positions
     for ent_id, ent in pairs(entities) do
         if ent.body then
+            local x, y = ent.body:getPosition()
             peer:send({
                 cmd = "spawn-box",
                 ent_id = ent_id,
-                pos_x = ent.body.x,
-                pos_y = ent.body.y,
+                pos_x = x,
+                pos_y = y,
                 size = 20 -- to do: send vert details to/from server 
             })
         end
