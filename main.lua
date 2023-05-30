@@ -34,8 +34,12 @@ function love.quit()
     hooks.call("quit")
 end
 
-function love.keyreleased(key, scancode, isrepeat)
-    hooks.call("keyreleased", key, scancode, isrepeat)
+function love.keyreleased(...)
+    hooks.call("keyreleased", ...)
+end
+
+function love.resize(...)
+    hooks.call("resize", ...)
 end
 
 hooks.add("uncaught-message", function(peer, msg)

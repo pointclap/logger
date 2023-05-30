@@ -1,9 +1,5 @@
 localplayer = nil
 
-local font = love.graphics.newFont(9, "mono")
-font:setFilter("nearest")
-love.graphics.setFont(font)
-
 local function hsl2rgb(h, s, l, a)
     if s == nil then
         s = 1
@@ -83,10 +79,6 @@ messages.subscribe("new-player", function(peer, msg)
     players[id].mouseY = 0
     players[id].username = msg.username
     players[id].uniqueid = tonumber(msg.uniqueid)
-    players[id].username_text = msg.username .. "#" .. msg.uniqueid
-    players[id].drawable_text = love.graphics.newText(font, {{colour.r, colour.g, colour.b},
-                                                             msg.username .. "#" .. msg.uniqueid})
-    players[id].contact_sound = love.audio.newSource("assets/audio/toot.wav", "static")
 
     players[id].interpolated_position = {
         x = 0,
@@ -95,6 +87,7 @@ messages.subscribe("new-player", function(peer, msg)
     
     players[id].body = physics.spawnPlayer(id)
     models.set_model(id, "character")
+    labels.set_label(id, msg.username .. "#" .. msg.uniqueid)
 end)
 
 messages.subscribe("player-left", function(peer, msg)
@@ -178,28 +171,6 @@ hooks.add("update", function(dt)
     end
 end)
 
-local function render_username(player)
-    love.graphics.setColor(player.colour.r, player.colour.g, player.colour.b)
-
-    if player.interpolated_position and player.username and player.uniqueid then
-        player.drawable_text:set(player.username_text)
-        local w, h = player.drawable_text:getDimensions()
-        love.graphics.draw(player.drawable_text, player.interpolated_position.x - w / 2, player.interpolated_position.y - 30)
-    end
-end
-
-hooks.add("draw_world", function()
-    -- render all other players first..
-    for id, player in pairs(players) do
-        if id ~= localplayer then
-            render_username(player)
-        end
-    end
-
-    if localplayer then
-        render_username(players[localplayer])
-    end
-end)
 
 hooks.add("draw_local", function()
     if not players[localplayer] then return end
