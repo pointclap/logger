@@ -85,7 +85,7 @@ messages.subscribe("new-player", function(peer, msg)
         if ent.body then
             local x, y = ent.body:getPosition()
             local size = 20
-            
+
             peer:send({
                 cmd = "spawn-box",
                 ent_id = ent_id,
@@ -106,6 +106,18 @@ messages.subscribe("new-player", function(peer, msg)
 end)
 
 messages.subscribe("update-position", function(peer, msg)
+    -- So right now all the players communicate to the server
+    -- their position and velocity, but the server doesn't
+    -- have any serverside physics body for the player, so
+    -- no collision detection/resolution is done 
+    -- TO DO: put players' bodies into entities and run world
+    -- updates on those bodies, then send back the updated 
+    -- positions and velocities to clients
+
+    -- Remember: server is always authoritative when it comes
+    -- to physics simulation. Client can do its own thing as
+    -- a means of interpolation but when the server tells the
+    -- client where things really are they should be put in place
     network.broadcast({
         cmd = msg.cmd,
         id = msg.id,
