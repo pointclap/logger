@@ -86,7 +86,6 @@ messages.subscribe("new-player", function(peer, msg)
     players[id].username_text = msg.username .. "#" .. msg.uniqueid
     players[id].drawable_text = love.graphics.newText(font, {{colour.r, colour.g, colour.b},
                                                              msg.username .. "#" .. msg.uniqueid})
-    players[id].contact_sound = love.audio.newSource("assets/audio/toot.wav", "static")
 
     players[id].interpolated_position = {
         x = 0,

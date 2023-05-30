@@ -10,10 +10,8 @@ entities = {}
 local function collision_callback(a, b, contact)
     local a, b = a:getUserData(), b:getUserData()
 
-    for _, player_id in pairs({a, b}) do
-        if players[player_id] and players[player_id].contact_sound then
-            players[player_id].contact_sound:play()
-        end
+    if a and b and players[a] and players[b] then
+        hooks.call("collision", a, b, contact)
     end
 end
 
