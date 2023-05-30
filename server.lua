@@ -56,9 +56,11 @@ messages.subscribe("new-player", function(peer, msg)
     player.peer = peer
     player.move = {
         x  = 0,
-        y  = 0,
-        dx = 0,
-        dy = 0
+        y  = 0
+    }
+    player.mouse = {
+        x = 0,
+        y = 0
     }
     player_index[peer:index()] = player_id
 
@@ -127,7 +129,31 @@ messages.subscribe("player-move", function(peer, msg)
         player.move.y = y
     else
         log.error("player-move called but no player!!")
+        return
     end
+end)
+
+messages.subscribe("update-mouse", function(peer, msg)
+    local player_id = player_index[peer:index()]
+    local player = entities.get(player_id)
+    local x = tonumber(msg.x)
+    local y = tonumber(msg.y)
+
+    if player then
+        player.mouse.x = x
+        player.mouse.y = y
+    else
+        log.error("update-mouse called but no player!!")
+        return
+    end
+    
+    -- relay mouse position to all connected players
+    network.broadcast({
+        cmd = "update-mouse",
+        id = player_id,
+        x = x,
+        y = y
+    })
 end)
 
 messages.subscribe("report-player-position", function(peer, msg)
@@ -157,15 +183,6 @@ messages.subscribe("report-player-position", function(peer, msg)
         y = msg.y,
         vx = msg.vx,
         vy = msg.vy
-    })
-end)
-
-messages.subscribe("update-mouse", function(peer, msg)
-    network.broadcast({
-        cmd = msg.cmd,
-        id = msg.id,
-        mouseX = msg.mouseX,
-        mouseY = msg.mouseY
     })
 end)
 
@@ -201,6 +218,12 @@ hooks.add("fixed_timestep", function(fixed_timestep)
         if ent.body then
             local x, y = ent.body:getPosition()
             local vx, vy = ent.body:getLinearVelocity()
+            local ax, ay = 0, 0
+
+            if ent.player then
+                ax = ent.player.move.x * 100000.0 * fixed_timestep
+                ay = ent.player.move.y * 100000.0 * fixed_timestep
+            end
 
             network.broadcast({
                 cmd = "update-body",
@@ -208,7 +231,9 @@ hooks.add("fixed_timestep", function(fixed_timestep)
                 x = x,
                 y = y,
                 vx = vx,
-                vy = vy
+                vy = vy,
+                ax = ax,
+                ay = ay
             })
         end
     end

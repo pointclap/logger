@@ -60,6 +60,10 @@ messages.subscribe("update-body", function(peer, msg)
     if entity.body then
         entity.body:setPosition(tonumber(msg.x), tonumber(msg.y))
         entity.body:setLinearVelocity(tonumber(msg.vx), tonumber(msg.vy))
+
+        if entity.player then
+            entity.body.applyForce(tonumber(msg.ax), tonumber(msg.ay))
+        end
     end
 end)
 

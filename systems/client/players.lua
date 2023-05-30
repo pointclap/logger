@@ -89,6 +89,13 @@ messages.subscribe("new-player", function(peer, msg)
         dy = 0
     }
 
+    player.mouse = {
+        x  = 0,
+        y  = 0,
+        dx = 0,
+        dy = 0
+    }
+
     local body = physics.new_body("dynamic")
     local shape = love.physics.newCircleShape(10)
     local fixture = love.physics.newFixture(body, shape, 5)
@@ -108,15 +115,15 @@ messages.subscribe("update-mouse", function(peer, msg)
     local player_id = tonumber(msg.id)
     if player_id ~= localplayer then
         local player = entities.get(player_id)
-        player.mouseX = tonumber(msg.mouseX)
-        player.mouseY = tonumber(msg.mouseY)
+        player.mouse.x = tonumber(msg.x)
+        player.mouse.y = tonumber(msg.y)
     end
 end)
 
 hooks.add("fixed_timestep", function(fixed_timestep)
     local player = entities.get(localplayer)
     if player then
-        if love.window.hasMouseFocus() then
+        if love.window.hasFocus() then
             player.move.dx = player.move.x
             player.move.dy = player.move.y
             
@@ -147,6 +154,19 @@ hooks.add("fixed_timestep", function(fixed_timestep)
                     y = player.move.y
                 })
             end
+
+            player.mouse.dx = player.mouse.x
+            player.mouse.dy = player.mouse.y
+
+            player.mouse.x, player.mouse.y = love.mouse:getPosition()
+            
+            if player.mouse.x ~= player.mouse.dx or player.mouse.y ~= player.mouse.dy then
+                network.broadcast({
+                    cmd = "update-mouse",
+                    x = player.mouse.x,
+                    y = player.mouse.y
+                })
+            end
         end
     end
 end)
@@ -160,21 +180,21 @@ hooks.add("update", function(dt)
             local x, y = player.body:getPosition()
             local vx, vy = player.body:getLinearVelocity()
 
-            network.broadcast({
-                cmd = "report-player-position",
-                id = localplayer,
-                x = x,
-                y = y,
-                vx = vx,
-                vy = vy
-            })
+            -- network.broadcast({
+            --     cmd = "report-player-position",
+            --     id = localplayer,
+            --     x = x,
+            --     y = y,
+            --     vx = vx,
+            --     vy = vy
+            -- })
 
-            network.broadcast({
-                cmd = "update-mouse",
-                id = localplayer,
-                mouseX = player.mouseX,
-                mouseY = player.mouseY
-            })
+            -- network.broadcast({
+            --     cmd = "update-mouse",
+            --     id = localplayer,
+            --     mouseX = player.mouseX,
+            --     mouseY = player.mouseY
+            -- })
         end
         countdown = 0.1
     end
@@ -191,9 +211,9 @@ hooks.add("draw_local", function()
 
     for id, player in entities.players() do
         love.graphics.setColor(player.colour.r, player.colour.g, player.colour.b)
-        if player.mouseX and player.mouseY then
-            local mouseX = player.mouseX
-            local mouseY = player.mouseY
+        if player.mouse then
+            local mouseX = player.mouse.x
+            local mouseY = player.mouse.y
 
             if id ~= localplayer and player.interpolated_position then
                 mouseX = mouseX + player.interpolated_position.x - x
