@@ -49,7 +49,7 @@ local function hsl2rgb(h, s, l, a)
 end
 
 hooks.add("connected", function(peer)
-    print("connected to server!")
+    log.info("connected to server!")
     network.broadcast({
         cmd = "new-player",
         username = username
@@ -59,10 +59,10 @@ end)
 messages.subscribe("new-player", function(peer, msg)
     local id = tonumber(msg.id)
     if msg.username == username and localplayer == nil then
-        print("localplayer not set, assigning " .. msg.id)
+        log.debug("localplayer not set, assigning " .. msg.id)
         localplayer = id
     else
-        print("New player " .. msg.username .. "#" .. msg.uniqueid .. " joined!")
+        log.info("New player " .. msg.username .. "#" .. msg.uniqueid .. " joined!")
     end
 
     if players[id] == nil then
@@ -106,7 +106,7 @@ end)
 
 messages.subscribe("player-left", function(peer, msg)
     players[tonumber(msg.id)] = nil
-    print("Player " .. msg.username .. "#" .. msg.uniqueid .. " left!")
+    log.info("Player " .. msg.username .. "#" .. msg.uniqueid .. " left!")
 end)
 
 messages.subscribe("update-position", function(peer, msg)
