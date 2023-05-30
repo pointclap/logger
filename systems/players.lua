@@ -48,6 +48,14 @@ local function hsl2rgb(h, s, l, a)
     }
 end
 
+hooks.add("connected", function(peer)
+    print("connected to server!")
+    network.broadcast({
+        cmd = "new-player",
+        username = username
+    })
+end)
+
 messages.subscribe("new-player", function(peer, msg)
     local id = tonumber(msg.id)
     if msg.username == username and localplayer == nil then
@@ -79,6 +87,21 @@ messages.subscribe("new-player", function(peer, msg)
     players[id].contact_sound = love.audio.newSource("assets/audio/toot.wav", "static")
 
     models.set_model(id, "character")
+end)
+
+messages.subscribe("new-player", function(peer, msg)
+    local id = tonumber(msg.id);
+
+    if players[id] == nil then
+        players[id] = {}
+    end
+
+    players[id].interpolated_position = {
+        x = 0,
+        y = 0
+    }
+    
+    players[id].body = physics.spawnPlayer(id)
 end)
 
 messages.subscribe("player-left", function(peer, msg)

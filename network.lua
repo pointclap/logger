@@ -2,7 +2,11 @@ local enet = require "enet"
 
 local wrapped_peer = {}
 function wrapped_peer:send(data)
-    self.peer:send(messages.encode(data))
+    return self.peer:send(messages.encode(data))
+end
+
+function wrapped_peer:index()
+    return self.peer:index()
 end
 
 local host = nil
@@ -27,23 +31,27 @@ hooks.add("update", function(dt)
     if host then
         local event = host:service()
         while event do
-            if event.type == "receive" then
-                -- Wrap the peer so we can do custom encoding on the transmitted data.
-                local peer = setmetatable({
-                    peer = event.peer
-                }, {
-                    __index = wrapped_peer
-                })
+            -- Wrap the peer so we can do custom encoding on the transmitted data.
+            local peer = setmetatable({
+                peer = event.peer
+            }, {
+                __index = wrapped_peer
+            })
 
-                messages.incoming(peer, messages.decode(event.data))
+            if event.type == "receive" then
+                print("received message: ", event.data)
+                local encoded_message = messages.decode(event.data);
+                -- Submit message to subscribers, calling the 'uncaught-message'
+                -- hook if nobody is subscribed to the message.
+                if messages.incoming(peer, encoded_message) == 0 then
+                    hooks.call("uncaught-message", peer, encoded_message)
+                end
+
             elseif event.type == "connect" then
-                print("connected to server")
-                broadcast({
-                    cmd = "new-player",
-                    username = username
-                })
-            elseif event.type == "disconnected" then
-                print("disconnected")
+                hooks.call("connected", peer)
+
+            elseif event.type == "disconnect" then
+                hooks.call("disconnected", peer)
             end
             event = host:service()
         end

@@ -1,43 +1,30 @@
-local debug = require("systems.client.debug")
-local physics = require("systems.physics")
-models = require("systems.client.models")
+hooks.add("uncaught-message", function(peer, msg)
+    network.broadcast(msg)
+end)
 
-local accumulated_deltatime = 0
-local fixed_timestep = 0.008
+local debug = require("systems.client.debug")
+models = require("systems.client.models")
 
 require("systems.client.grass")
 require("systems.players")
 
-players = {}
 username = nil
 tick_rate = 1 / 10
 
-local function load(args)
+hooks.add("load", function(args)
     username = args[2]
     network.connect(args[1]);
 
-    hooks.call("load", args)
-
     love.graphics.setDefaultFilter("nearest", "nearest", 0)
-end
+end)
 
-local function update(dt)
-    hooks.call("update", dt)
-
-    accumulated_deltatime = accumulated_deltatime + dt
-    while accumulated_deltatime > fixed_timestep do
-        hooks.call("fixed_timestep", fixed_timestep)
-        accumulated_deltatime = accumulated_deltatime - fixed_timestep
-    end
-end
-
-local function quit()
+hooks.add("quit", function()
     network.broadcast({
         cmd = "player-left"
     })
-end
+end)
 
-local function draw()
+hooks.add("draw", function()
     hooks.call("draw_local_pre")
 
     local width, height = love.graphics.getDimensions()
@@ -50,16 +37,4 @@ local function draw()
     end
 
     hooks.call("draw_local")
-end
-
-local function keyreleased(key, scancode, isrepeat)
-    hooks.call("keyreleased", key, scancode, isrepeat)
-end
-
-return {
-    draw = draw,
-    load = load,
-    update = update,
-    quit = quit,
-    keyreleased = keyreleased
-}
+end)

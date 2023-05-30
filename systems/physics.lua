@@ -3,6 +3,10 @@ local velocity_iterations = 8
 local position_iterations = 3
 local drag_coefficient = 5
 
+entid = 0
+players = {}
+entities = {}
+
 local function collision_callback(a, b, contact)
     local a, b = a:getUserData(), b:getUserData()
 
@@ -44,6 +48,17 @@ local function spawnBox(ent_id, pos_x, pos_y, size)
             size = size
         })
     end
+end
+
+local function spawnPlayer(player_id)
+    local body = love.physics.newBody(world, 0, 0, "dynamic");
+    local shape = love.physics.newCircleShape(10)
+    local fixture = love.physics.newFixture(body, shape, 5)
+
+    -- Store the entity id in the body, so we can do collision stuff
+    fixture:setUserData(player_id)
+
+    return body
 end
 
 local function apply_drag(dt)
@@ -109,28 +124,6 @@ messages.subscribe("update-world", function(peer, msg)
     end
 end)
 
-messages.subscribe("new-player", function(peer, msg)
-    local id = tonumber(msg.id);
-
-    if players[id] == nil then
-        players[id] = {}
-    end
-
-    players[id].interpolated_position = {
-        x = 0,
-        y = 0
-    }
-
-    local body = love.physics.newBody(world, 0, 0, "dynamic");
-    local shape = love.physics.newCircleShape(10)
-    local fixture = love.physics.newFixture(body, shape, 5)
-
-    -- Store the entity id in the body, so we can do collision stuff
-    fixture:setUserData(id)
-
-    players[id].body = body
-end)
-
 hooks.add("draw_world", function()
     if is_server then return end
     
@@ -161,5 +154,6 @@ hooks.add("draw_world", function()
 end)
 
 return {
-    spawnBox = spawnBox
+    spawnBox = spawnBox,
+    spawnPlayer = spawnPlayer,
 }

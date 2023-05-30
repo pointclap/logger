@@ -1,4 +1,4 @@
-local command_subscribers = {}
+local message_subscribers = {}
 
 local function decode(data)
 	decoded_message = {}
@@ -19,19 +19,23 @@ local function encode(data)
 end
 
 local function subscribe(name, func)
-	if command_subscribers[name] == nil then
-		command_subscribers[name] = {}
+	if message_subscribers[name] == nil then
+		message_subscribers[name] = {}
 	end
  
-	table.insert(command_subscribers[name], func)
+	table.insert(message_subscribers[name], func)
 end
 
 local function incoming(peer, msg)
-	if msg.cmd and command_subscribers[msg.cmd] then
-		for _, handler in pairs(command_subscribers[msg.cmd]) do
+	local fired_handlers = 0
+	if msg.cmd and message_subscribers[msg.cmd] then
+		for _, handler in pairs(message_subscribers[msg.cmd]) do
 			handler(peer, msg)
+			fired_handlers = fired_handlers + 1
 		end
 	end
+
+	return fired_handlers
 end
 
 return {
