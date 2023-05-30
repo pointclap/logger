@@ -20,9 +20,16 @@ local character = {
 
             -- take the angle of the velocity, divide it into 8 equal parts and assign
             -- each of them to one animation direction.
-            local angle = math.floor(((math.atan2(y, x) + math.pi) / (2*math.pi) * 8 + (1/16)) % 8) + 1
-            player.animated.direction = directions[angle]
+            -- local angle = math.floor(((math.atan2(y, x) + math.pi) / (2*math.pi) * 8 + (1/16)) % 8) + 1
+            -- player.animated.direction = directions[angle]
         end
+    
+        -- get angle from player to their mouse
+        local w, h = love.graphics:getDimensions()
+        x = player.mouseX - w / 2
+        y = player.mouseY - h / 2
+        local angle = math.floor(((math.atan2(y, x) + math.pi) / (2*math.pi) * 8 + (1/16)) % 8) + 1
+        player.animated.direction = directions[angle]
     end,
     animations = {
         stand = {
