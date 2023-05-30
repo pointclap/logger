@@ -25,10 +25,8 @@ end)
 
 local function spawnBox(ent_id, pos_x, pos_y, size)
     local body = love.physics.newBody(world, pos_x, pos_y, "dynamic");
-    local shape = love.physics.newPolygonShape(-size/2, -size/2,
-                                                size/2, -size/2,
-                                                size/2,  size/2,
-                                               -size/2,  size/2)
+    local shape = love.physics.newPolygonShape(-size / 2, -size / 2, size / 2, -size / 2, size / 2, size / 2, -size / 2,
+        size / 2)
     local fixture = love.physics.newFixture(body, shape, 5)
     fixture:setUserData(ent_id)
     entities[ent_id] = {}
@@ -38,16 +36,6 @@ local function spawnBox(ent_id, pos_x, pos_y, size)
     }
     entities[ent_id].body = body
     entities[ent_id].vertices = {shape:getPoints()}
-    
-    if is_server then
-        enethost:broadcast({
-            cmd = "spawn-box",
-            ent_id = ent_id,
-            pos_x = pos_x,
-            pos_y = pos_y,
-            size = size
-        })
-    end
 end
 
 local function spawnPlayer(player_id)
@@ -116,8 +104,10 @@ end)
 
 messages.subscribe("update-world", function(peer, msg)
     local ent_id = tonumber(msg.ent_id)
-    if not entities[ent_id] then return end
-    
+    if not entities[ent_id] then
+        return
+    end
+
     if entities[ent_id].body then
         entities[ent_id].body.x = tonumber(msg.x)
         entities[ent_id].body.y = tonumber(msg.y)
@@ -125,8 +115,10 @@ messages.subscribe("update-world", function(peer, msg)
 end)
 
 hooks.add("draw_world", function()
-    if is_server then return end
-    
+    if is_server then
+        return
+    end
+
     for ent_id, ent in pairs(entities) do
         love.graphics.setColor({1, 1, 1})
 
@@ -138,7 +130,7 @@ hooks.add("draw_world", function()
 
                 if shape:getType() == "polygon" and ent.vertices then
                     local verts = {}
-                    for k,v in pairs(ent.vertices) do
+                    for k, v in pairs(ent.vertices) do
                         if k % 2 == 0 then
                             verts[k] = v + x
                         else
@@ -155,5 +147,5 @@ end)
 
 return {
     spawnBox = spawnBox,
-    spawnPlayer = spawnPlayer,
+    spawnPlayer = spawnPlayer
 }
