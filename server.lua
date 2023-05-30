@@ -190,7 +190,7 @@ hooks.add("fixed_timestep", function(fixed_timestep)
                 local ms = 100000.0 * fixed_timestep
                 local force_x = player.move.x * ms
                 local force_y = player.move.y * ms
-                print("apply force ("..force_x..", "..force_y..")")
+                
                 player.body:applyForce(force_x, force_y)
             end
         end
