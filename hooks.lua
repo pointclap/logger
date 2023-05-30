@@ -15,7 +15,7 @@ end
 local function call(hook_name, ...)
     if hooks[hook_name] then
         for _, hook in pairs(hooks[hook_name]) do
-            --print("[TRACE] calling hook \"" .. hook_name .. "\" in " .. hook.definition.short_src .. ":" .. hook.definition.currentline )
+            log.trace("calling hook \"" .. hook_name .. "\" in " .. hook.definition.short_src .. ":" .. hook.definition.currentline )
             hook.func(...)
         end
     end
