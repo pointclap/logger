@@ -170,8 +170,8 @@ hooks.add("update", function(dt)
             local vx, vy = ent.body:getLinearVelocity()
 
             network.broadcast({
-                cmd = "update-world",
-                ent_id = ent_id,
+                cmd = "update-body",
+                id = id,
                 x = x,
                 y = y,
                 vx = vx,

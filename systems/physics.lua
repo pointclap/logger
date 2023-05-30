@@ -51,7 +51,7 @@ hooks.add("fixed_timestep", function(fixed_timestep)
 end)
 
 messages.subscribe("update-body", function(peer, msg)
-    local entity = entities.get(tonumber(msg.ent_id))
+    local entity = entities.get(tonumber(msg.id))
 
     if not entity then return end
 
