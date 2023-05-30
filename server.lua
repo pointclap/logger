@@ -123,8 +123,6 @@ messages.subscribe("player-move", function(peer, msg)
     local y = tonumber(msg.y)
 
     if player then
-        player.move.dx = player.move.x
-        player.move.dy = player.move.y
         player.move.x = x
         player.move.y = y
     else
