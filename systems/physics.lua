@@ -3,14 +3,10 @@ local velocity_iterations = 8
 local position_iterations = 3
 local drag_coefficient = 5
 
-entid = 0
-players = {}
-entities = {}
-
 local function collision_callback(a, b, contact)
     local a, b = a:getUserData(), b:getUserData()
 
-    if a and b and players[a] and players[b] then
+    if a and b and entities.get(a) and entities.get(b) then
         hooks.call("collision", a, b, contact)
     end
 end
@@ -21,73 +17,29 @@ hooks.add("load", function()
     world:setCallbacks(collision_callback)
 end)
 
-local function spawnBox(ent_id, pos_x, pos_y, size)
-    local body = love.physics.newBody(world, pos_x, pos_y, "dynamic");
-    local shape = love.physics.newPolygonShape(-size / 2, -size / 2,
-                                                size / 2, -size / 2,
-                                                size / 2,  size / 2,
-                                               -size / 2,  size / 2)
-
-    local fixture = love.physics.newFixture(body, shape, 5)
-    fixture:setUserData(ent_id)
-    entities[ent_id] = {}
-    entities[ent_id].interpolated_position = {
-        x = pos_x,
-        y = pos_y
-    }
-    entities[ent_id].body = body
-    entities[ent_id].vertices = {shape:getPoints()}
-end
-
-local function spawnPlayer(player_id)
-    local body = love.physics.newBody(world, 0, 0, "dynamic");
-    local shape = love.physics.newCircleShape(10)
-    local fixture = love.physics.newFixture(body, shape, 5)
-
-    -- Store the entity id in the body, so we can do collision stuff
-    fixture:setUserData(player_id)
-
-    return body
+local function new_body(type)
+    return love.physics.newBody(world, 0, 0, type)
 end
 
 local function apply_drag(dt)
-    for _, player in pairs(players) do
-        if player.body then
-            local x, y = player.body:getLinearVelocity()
-            player.body:applyForce(-x * drag_coefficient, -y * drag_coefficient)
-        end
-    end
-
-    for ent_id, ent in pairs(entities) do
-        if ent.body then
-            local x, y = ent.body:getLinearVelocity()
-            ent.body:applyForce(-x * drag_coefficient, -y * drag_coefficient)
+    for _, entity in entities.all() do
+        if entity.body then
+            local x, y = entity.body:getLinearVelocity()
+            entity.body:applyForce(-x * drag_coefficient, -y * drag_coefficient)
         end
     end
 end
 
 local function interpolate_position(dt)
-    for _, player in pairs(players) do
-        if player.body and player.interpolated_position then
-            local x, y = player.body:getPosition()
+    for _, entity in entities.all() do
+        if entity.body and entity.interpolated_position then
+            local x, y = entity.body:getPosition()
 
-            local x_distance = x - player.interpolated_position.x
-            local y_distance = y - player.interpolated_position.y
+            local x_distance = x - entity.interpolated_position.x
+            local y_distance = y - entity.interpolated_position.y
 
-            player.interpolated_position.x = player.interpolated_position.x + x_distance * dt * 20.0
-            player.interpolated_position.y = player.interpolated_position.y + y_distance * dt * 20.0
-        end
-    end
-
-    for ent_id, ent in pairs(entities) do
-        if ent.body and ent.interpolated_position and ent.interpolated_position.x and ent.interpolated_position.y then
-            local x, y = ent.body:getPosition()
-
-            local x_distance = x - ent.interpolated_position.x
-            local y_distance = y - ent.interpolated_position.y
-
-            ent.interpolated_position.x = ent.interpolated_position.x + x_distance * dt * 20.0
-            ent.interpolated_position.y = ent.interpolated_position.y + y_distance * dt * 20.0
+            entity.interpolated_position.x = entity.interpolated_position.x + x_distance * dt * 20.0
+            entity.interpolated_position.y = entity.interpolated_position.y + y_distance * dt * 20.0
         end
     end
 end
@@ -98,27 +50,19 @@ hooks.add("fixed_timestep", function(fixed_timestep)
     interpolate_position(fixed_timestep)
 end)
 
-messages.subscribe("spawn-box", function(peer, msg)
-    spawnBox(tonumber(msg.ent_id), tonumber(msg.pos_x), tonumber(msg.pos_y), tonumber(msg.size))
-end)
-
 messages.subscribe("update-world", function(peer, msg)
-    local ent_id = tonumber(msg.ent_id)
+    local entity = entities.get(tonumber(msg.ent_id))
 
-    if not entities[ent_id] then return end
+    if not entity then return end
 
-    if entities[ent_id].body then
-        entities[ent_id].body:setPosition(tonumber(msg.x), tonumber(msg.y))
-        entities[ent_id].body:setLinearVelocity(tonumber(msg.vx), tonumber(msg.vy))
+    if entity.body then
+        entity.body:setPosition(tonumber(msg.x), tonumber(msg.y))
+        entity.body:setLinearVelocity(tonumber(msg.vx), tonumber(msg.vy))
     end
 end)
 
 hooks.add("draw_world", function()
-    if is_server then
-        return
-    end
-
-    for ent_id, ent in pairs(entities) do
+    for ent_id, ent in entities.all() do
         love.graphics.setColor({1, 1, 1})
 
         if ent.body and ent.interpolated_position then
@@ -147,6 +91,5 @@ hooks.add("draw_world", function()
 end)
 
 return {
-    spawnBox = spawnBox,
-    spawnPlayer = spawnPlayer
+    new_body = new_body
 }

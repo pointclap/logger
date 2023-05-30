@@ -86,8 +86,9 @@ hooks.add("draw_local_pre", function()
         local width, height = love.graphics.getDimensions()
         love.graphics.rectangle("fill", 0, 0, width, height)
 
-        grass_shader:send("offset",
-            {players[localplayer].interpolated_position.x, players[localplayer].interpolated_position.y});
+        local player = entities.get(localplayer)
+
+        grass_shader:send("offset", {player.interpolated_position.x, player.interpolated_position.y});
         love.graphics.setColor(1.0, 1.0, 1.0, 1.0)
         love.graphics.setShader(grass_shader)
 

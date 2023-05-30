@@ -1,11 +1,26 @@
-local connected_players = {}
 local curtime = 0.0
 local nextupdate = 0.0
 local TICK_RATE = 1 / 60.0
 
-local function next_entity_id()
-    entid = entid + 1
-    return entid
+entities = require("systems.server.entities")
+player_index = {} -- Maps peer:index() to player entity ids
+
+local function spawnBox(pos_x, pos_y, size)
+    local id, entity = entities.spawn()
+
+    local body = physics.new_body("dynamic");
+    local shape = love.physics.newPolygonShape(-size / 2, -size / 2, size / 2, -size / 2, size / 2, size / 2, -size / 2,
+        size / 2)
+
+    local fixture = love.physics.newFixture(body, shape, 5)
+    fixture:setUserData(id)
+
+    entity.is_box = true
+    entity.interpolated_position = {
+        x = pos_x,
+        y = pos_y
+    }
+    entity.body = body
 end
 
 hooks.add("load", function(args)
@@ -13,82 +28,69 @@ hooks.add("load", function(args)
     network.listen();
     log.info("listening..")
     -- create a box at 50,50
-    physics.spawnBox(next_entity_id(), 50, 50, 20)
+    spawnBox(50, 50, 20)
 end)
-
-local function generate_uniqueid(username)
-    local newuniqueid = ""
-
-    while true do
-        local uniqueidused = 0
-        newuniqueid = math.random(1, 9999)
-
-        for id, ply in pairs(connected_players) do
-            if ply.username == username and ply.uniqueid == newuniqueid then
-                uniqueidused = 1
-                break
-            end
-        end
-
-        if uniqueidused == 0 then
-            break
-        end
-    end
-
-    return newuniqueid
-end
 
 hooks.add("uncaught-message", function(peer, msg)
     network.broadcast(msg)
 end)
 
 messages.subscribe("disconnect", function(peer, msg)
-    if connected_players[peer:index()] ~= nil then
-        network.broadcast({
-            cmd = "player-left",
-            username = connected_players[peer:index()].username,
-            uniqueid = connected_players[peer:index()].uniqueid,
-            id = peer:index()
-        })
+    for id, player in entities.players() do
+        if player.peer:index() == peer:index() then
+            network.broadcast({
+                cmd = "player-left",
+                username = player.username,
+                uniqueid = player.uniqueid,
+                id = id
+            })
 
-        connected_players[peer:index()] = nil
+            entities.delete(id)
+            return
+        end
     end
 end)
 
 messages.subscribe("new-player", function(peer, msg)
-    connected_players[peer:index()] = {
-        username = msg.username,
-        uniqueid = generate_uniqueid(msg.username)
-    }
+    player_id, player = entities.spawn()
+    player.username = msg.username
+    player.uniqueid = 69
+    player.peer = peer
+    player_index[peer:index()] = player_id
 
-    log.info(msg.username .. "#" .. connected_players[peer:index()].uniqueid .. " joined")
+    log.info(msg.username .. "(€" .. player_id .. ") joined")
 
     peer:send({
         cmd = "assign-localplayer",
-        id = peer:index()
+        id = player_id
     })
 
     -- Tell the new player about all other players
-    for id, ply in pairs(connected_players) do
-        if id ~= peer:index() then
+    for id, existing_player in entities.players() do
+        if existing_player.peer:index() ~= peer:index() then
             peer:send({
                 cmd = "new-player",
-                username = ply.username,
-                uniqueid = ply.uniqueid,
+                username = existing_player.username,
+                uniqueid = existing_player.uniqueid,
                 id = id
             })
         end
     end
 
     -- Tell new player about all entities and their positions
-    for ent_id, ent in pairs(entities) do
-        if ent.body then
-            local x, y = ent.body:getPosition()
+    for id, entity in entities.all() do
+        peer:send({
+            cmd = "entity-spawned",
+            id = id
+        });
+
+        if entity.is_box and entity.body then
+            local x, y = entity.body:getPosition()
             local size = 20
 
             peer:send({
                 cmd = "spawn-box",
-                ent_id = ent_id,
+                id = id,
                 pos_x = x,
                 pos_y = y,
                 size = size -- to do: send vert details to/from server 
@@ -99,9 +101,9 @@ messages.subscribe("new-player", function(peer, msg)
     -- Tell all players (including the player itself) about the new player
     network.broadcast({
         cmd = "new-player",
-        username = connected_players[peer:index()].username,
-        uniqueid = connected_players[peer:index()].uniqueid,
-        id = peer:index()
+        username = player.username,
+        uniqueid = player.uniqueid,
+        id = player_id
     })
 end)
 
@@ -138,11 +140,17 @@ messages.subscribe("update-mouse", function(peer, msg)
 end)
 
 messages.subscribe("player-left", function(peer, msg)
+    local player_id = player_index[peer:index()]
+    local player = entities.get(player_id)
+
+    entities.delete(player_id)
+    player_index[peer:index()] = nil
+
     network.broadcast({
         cmd = "player-left",
-        username = connected_players[peer:index()].username,
-        uniqueid = connected_players[peer:index()].uniqueid,
-        id = peer:index()
+        username = player.username,
+        uniqueid = player.uniqueid,
+        id = player_id
     })
 end)
 
@@ -154,7 +162,7 @@ hooks.add("update", function(dt)
     nextupdate = curtime + TICK_RATE
 
     -- Now send the world data to all players
-    for ent_id, ent in pairs(entities) do
+    for ent_id, ent in entities.all() do
         if ent.body then
             local x, y = ent.body:getPosition()
             local vx, vy = ent.body:getLinearVelocity()
@@ -171,6 +179,3 @@ hooks.add("update", function(dt)
     end
 end)
 
-return {
-    load = load
-}

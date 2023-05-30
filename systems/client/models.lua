@@ -99,10 +99,10 @@ local models = {
     character = character
 }
 
-local function set_model(player_id, model)
+local function set_model(entity_id, model)
     local model = models[model]
 
-    players[player_id].animated = {
+    entities.get(entity_id).animated = {
         model = model,
         frame = 1,
         frametime = 0,
@@ -111,7 +111,7 @@ local function set_model(player_id, model)
 end
 
 hooks.add("update", function(dt)
-    for _, player in pairs(players) do
+    for _, player in entities.players() do
         if player.animated then
             if player.animated.model.animation_selector then
                 player.animated.model.animation_selector(player)
@@ -134,7 +134,7 @@ hooks.add("update", function(dt)
 end)
 
 hooks.add("draw_world", function()
-    for _, player in pairs(players) do
+    for _, player in entities.players() do
         love.graphics.setColor(1, 1, 1, 1)
         if player.animated then
             local quad = player.animated.model.animations[player.animated.animation][player.animated.direction][player.animated.frame].quad

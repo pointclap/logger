@@ -21,7 +21,7 @@ hooks.add("draw_local", function()
     love.graphics.setColor(0.8, 0.8, 0.8, 1.0)
     love.graphics.draw(framerate, 20, 20)
     
-    for _, player in pairs(players) do   
+    for _, player in entities.players() do   
         love.graphics.setColor(player.colour.r, player.colour.g, player.colour.b)
 
         if player.mouseX and player.mouseY then
@@ -44,7 +44,7 @@ end)
 hooks.add("draw_world", function()
     if not debug_mode then return end
 
-    for _, player in pairs(players) do
+    for _, player in entities.players() do
         love.graphics.setColor(player.colour.r, player.colour.g, player.colour.b)
 
         if player.body then
