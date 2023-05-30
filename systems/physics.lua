@@ -36,14 +36,6 @@ local function spawnBox(ent_id, pos_x, pos_y, size)
     }
     entities[ent_id].body = body
     entities[ent_id].vertices = {shape:getPoints()}
-
-    --entities[ent_id].vertices = {}
-    -- local vertices = {shape:getPoints()}
-    -- for k, v in pairs(vertices) do
-    --     if k%2 == 0 then
-    --         table.insert(entities[ent_id].vertices, {x=vertices[k-1], y=vertices[k]})
-    --     end
-    -- end
 end
 
 local function spawnPlayer(player_id)
@@ -117,8 +109,8 @@ messages.subscribe("update-world", function(peer, msg)
     end
 
     if entities[ent_id].body then
-        entities[ent_id].body.x = tonumber(msg.x)
-        entities[ent_id].body.y = tonumber(msg.y)
+        entities[ent_id].body:setPosition(tonumber(msg.x), tonumber(msg.y))
+        entities[ent_id].body:setLinearVelocity(tonumber(msg.vx), tonumber(msg.vy))
     end
 end)
 

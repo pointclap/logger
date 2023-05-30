@@ -116,11 +116,16 @@ hooks.add("update", function(dt)
     -- Now send the world data to all players
     for ent_id, ent in pairs(entities) do
         if ent.body then
+            local x, y = ent.body:getPosition()
+            local vx, vy = ent.body:getLinearVelocity()
+
             network.broadcast({
                 cmd = "update-world",
                 ent_id = ent_id,
-                x = ent.body.x,
-                y = ent.body.y
+                x = x,
+                y = y,
+                vx = vx,
+                vy = vy
             })
         end
     end
