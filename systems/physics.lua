@@ -90,6 +90,8 @@ hooks.add("draw_world", function()
                     end
 
                     love.graphics.polygon("line", verts)
+                elseif shape:getType() == "circle" and ent.radius then
+                    love.graphics.circle("line", x, y, ent.radius)
                 end
             end
         end

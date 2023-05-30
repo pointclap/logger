@@ -5,12 +5,21 @@ local TICK_RATE = 1 / 60.0
 entities = require("systems.server.entities")
 player_index = {} -- Maps peer:index() to player entity ids
 
-local function spawnBox(pos_x, pos_y, size)
+local function spawnBox(pos_x, pos_y, width, height)
     local id, entity = entities.spawn()
+    if width and not height then
+        height = width
+    elseif height and not width then 
+        width = height
+    elseif not width and not height then
+        return
+    end
 
     local body = physics.new_body("dynamic");
-    local shape = love.physics.newPolygonShape(-size / 2, -size / 2, size / 2, -size / 2, size / 2, size / 2, -size / 2,
-        size / 2)
+    local shape = love.physics.newPolygonShape(-width / 2, -height / 2, 
+                                                width / 2, -height / 2,
+                                                width / 2,  height / 2, 
+                                               -width / 2,  height / 2)
 
     local fixture = love.physics.newFixture(body, shape, 5)
     fixture:setUserData(id)
@@ -21,6 +30,24 @@ local function spawnBox(pos_x, pos_y, size)
         y = pos_y
     }
     entity.body = body
+    entity.body:setPosition(pos_x, pos_y)
+end
+
+local function spawnCircle(pos_x, pos_y, radius)
+    local id, entity = entities.spawn()
+    local body = physics.new_body("static")
+    local shape = love.physics.newCircleShape(radius)
+    local fixture = love.physics.newFixture(body, shape, 5)
+    fixture:setUserData(id)
+
+    entity.is_circle = true
+    entity.interpolated_position = {
+        x = pos_x,
+        y = pos_y
+    }
+    entity.radius = radius
+    entity.body = body
+    entity.body:setPosition(pos_x, pos_y)
 end
 
 hooks.add("load", function(args)
@@ -28,7 +55,12 @@ hooks.add("load", function(args)
     network.listen();
     log.info("listening..")
     -- create a box at 50,50
-    spawnBox(50, 50, 20)
+    spawnBox(50, 50, 50, 20)
+
+    for i=1, 10 do
+        local min, max = -500, 500
+        spawnCircle(love.math.random(min, max), love.math.random(min, max), love.math.random(10, 30))
+    end
 end)
 
 hooks.add("uncaught-message", function(peer, msg)
@@ -87,14 +119,30 @@ messages.subscribe("new-player", function(peer, msg)
 
         if entity.is_box and entity.body then
             local x, y = entity.body:getPosition()
-            local size = 20
-
+            local size = 20 -- to do: send vert details to/from server 
+            -- if the box is not square shaped then this fails compeltely
+            -- not sure best way to send down variable amount of vertices
+            -- so that client can accurately construct a body/prop
             peer:send({
                 cmd = "spawn-box",
                 id = id,
                 pos_x = x,
                 pos_y = y,
-                size = size -- to do: send vert details to/from server 
+                size = size
+            })
+        elseif entity.is_circle and entity.body then
+            local x, y = entity.body:getPosition()
+            -- all of this is risky, we don't know for sure about fixtures of shape type
+            -- make this more robust later
+            local shape = entity.body:getFixtures()[1]:getShape()
+            local radius = shape:getRadius()
+
+            peer:send({
+                cmd = "spawn-circle",
+                id = id,
+                pos_x = x,
+                pos_y = y,
+                radius = radius
             })
         end
     end

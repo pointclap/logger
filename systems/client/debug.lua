@@ -24,19 +24,19 @@ hooks.add("draw_local", function()
     for _, player in entities.players() do   
         love.graphics.setColor(player.colour.r, player.colour.g, player.colour.b)
 
-        if player.mouseX and player.mouseY then
-            local mouseX = player.mouseX
-            local mouseY = player.mouseY
+        if player.mouse.x and player.mouse.y then
+            local x = player.mouse.x
+            local y = player.mouse.y
 
             if id ~= localplayer and player.interpolated_position then
-                mouseX = mouseX + player.interpolated_position.x - player.interpolated_position.x
-                mouseY = mouseY + player.interpolated_position.y - player.interpolated_position.y
+                x = mouse.x + player.interpolated_position.x - player.interpolated_position.x
+                y = mouse.y + player.interpolated_position.y - player.interpolated_position.y
             end
 
-            mouse_text:set("mouseX: " .. player.mouseX)
-            love.graphics.draw(mouse_text, mouseX, mouseY + 10)
-            mouse_text:set("mouseY: " .. player.mouseY)
-            love.graphics.draw(mouse_text, mouseX, mouseY + 20)
+            mouse_text:set("mouse.x: " .. player.mouse.x)
+            love.graphics.draw(mouse_text, x, y + 10)
+            mouse_text:set("mouse.y: " .. player.mouse.y)
+            love.graphics.draw(mouse_text, x, y + 20)
         end
     end
 end)
