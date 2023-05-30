@@ -63,17 +63,6 @@ messages.subscribe("new-player", function(peer, msg)
         id = player_id
     })
 
-    -- Tell the new player about all other players
-    for id, existing_player in entities.players() do
-        if existing_player.peer:index() ~= peer:index() then
-            peer:send({
-                cmd = "new-player",
-                username = existing_player.username,
-                id = id
-            })
-        end
-    end
-
     -- Tell new player about all entities and their positions
     for id, entity in entities.all() do
         peer:send({
@@ -91,6 +80,17 @@ messages.subscribe("new-player", function(peer, msg)
                 pos_x = x,
                 pos_y = y,
                 size = size -- to do: send vert details to/from server 
+            })
+        end
+    end
+
+    -- Tell the new player about all other players
+    for id, existing_player in entities.players() do
+        if existing_player.peer:index() ~= peer:index() then
+            peer:send({
+                cmd = "new-player",
+                username = existing_player.username,
+                id = id
             })
         end
     end
@@ -173,4 +173,3 @@ hooks.add("update", function(dt)
         end
     end
 end)
-
