@@ -1,6 +1,8 @@
 local debug_mode = false
 local font = love.graphics.newFont(12, "mono")
 font:setFilter("nearest")
+
+local mouse_text = love.graphics.newText(font, {{ 1.0, 1.0, 1.0 }, ""})
 local framerate = love.graphics.newText(font, {0.8, 0.8, 0.8, 1.0, "0.00ms"})
 
 local countdown = 0
@@ -31,10 +33,10 @@ hooks.add("draw_local", function()
                 mouseY = mouseY + player.interpolated_position.y - players[localplayer].interpolated_position.y
             end
 
-            player.drawable_text:set("mouseX: " .. player.mouseX)
-            love.graphics.draw(player.drawable_text, mouseX, mouseY + 10)
-            player.drawable_text:set("mouseY: " .. player.mouseY)
-            love.graphics.draw(player.drawable_text, mouseX, mouseY + 20)
+            mouse_text:set("mouseX: " .. player.mouseX)
+            love.graphics.draw(mouse_text, mouseX, mouseY + 10)
+            mouse_text:set("mouseY: " .. player.mouseY)
+            love.graphics.draw(mouse_text, mouseX, mouseY + 20)
         end
     end
 end)
@@ -56,11 +58,10 @@ hooks.add("draw_world", function()
             end
                 
             love.graphics.push()
-            -- love.graphics.scale(fontSize)
-            player.drawable_text:set("int x: " .. player.interpolated_position.x)
-            love.graphics.draw(player.drawable_text, player.interpolated_position.x, player.interpolated_position.y + 30)
-            player.drawable_text:set("int y: " .. player.interpolated_position.y)
-            love.graphics.draw(player.drawable_text, player.interpolated_position.x, player.interpolated_position.y + 40)
+            mouse_text:set("int x: " .. player.interpolated_position.x)
+            love.graphics.draw(mouse_text, player.interpolated_position.x, player.interpolated_position.y + 30)
+            mouse_text:set("int y: " .. player.interpolated_position.y)
+            love.graphics.draw(mouse_text, player.interpolated_position.x, player.interpolated_position.y + 40)
             love.graphics.pop()
         end
     end
