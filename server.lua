@@ -3,7 +3,6 @@ local curtime = 0.0
 local nextupdate = 0.0
 local TICK_RATE = 1 / 60.0
 
-
 local function next_entity_id()
     entid = entid + 1
     return entid
@@ -59,21 +58,24 @@ end)
 messages.subscribe("new-player", function(peer, msg)
     connected_players[peer:index()] = {
         username = msg.username,
-        uniqueid = generate_uniqueid(msg.username),
+        uniqueid = generate_uniqueid(msg.username)
     }
 
     log.info(msg.username .. "#" .. connected_players[peer:index()].uniqueid .. " joined")
 
+    peer:send({
+        cmd = "assign-localplayer",
+        id = peer:index()
+    })
+
     -- Tell the new player about all other players
     for id, ply in pairs(connected_players) do
-        if id ~= peer:index() then
-            peer:send({
-                cmd = "new-player",
-                username = ply.username,
-                uniqueid = ply.uniqueid,
-                id = id
-            })
-        end
+        peer:send({
+            cmd = "new-player",
+            username = ply.username,
+            uniqueid = ply.uniqueid,
+            id = id
+        })
     end
 
     -- Tell new player about all entities and their positions
@@ -85,7 +87,7 @@ messages.subscribe("new-player", function(peer, msg)
                 ent_id = ent_id,
                 pos_x = x,
                 pos_y = y,
-                size = 0 -- to do: send vert details to/from server 
+                size = 20 -- to do: send vert details to/from server 
             })
         end
     end
@@ -99,7 +101,7 @@ messages.subscribe("new-player", function(peer, msg)
     })
 end)
 
-messag.subscribe("update-position", function(peer, msg)
+messages.subscribe("update-position", function(peer, msg)
     network.broadcast({
         cmd = msg.cmd,
         id = msg.id,
@@ -130,7 +132,9 @@ end)
 
 hooks.add("update", function(dt)
     curtime = curtime + dt
-    if curtime < nextupdate then return end
+    if curtime < nextupdate then
+        return
+    end
     nextupdate = curtime + TICK_RATE
 
     -- Now send the world data to all players
@@ -152,5 +156,5 @@ hooks.add("update", function(dt)
 end)
 
 return {
-    load = load,
+    load = load
 }

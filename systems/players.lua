@@ -56,14 +56,16 @@ hooks.add("connected", function(peer)
     })
 end)
 
+messages.subscribe("assign-localplayer", function(peer, msg)
+    id = tonumber(msg.id)
+    log.debug("localplayer not set, assigning " .. id)
+    localplayer = id
+end)
+
 messages.subscribe("new-player", function(peer, msg)
     local id = tonumber(msg.id)
-    if msg.username == username and localplayer == nil then
-        log.debug("localplayer not set, assigning " .. msg.id)
-        localplayer = id
-    else
-        log.info("New player " .. msg.username .. "#" .. msg.uniqueid .. " joined!")
-    end
+    
+    log.info("New player " .. msg.username .. "#" .. msg.uniqueid .. " joined!")
 
     if players[id] == nil then
         players[id] = {}
