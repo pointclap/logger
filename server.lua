@@ -12,7 +12,7 @@ end
 hooks.add("load", function(args)
     love.window.close()
     network.listen();
-    print("listening..")
+    log.info("listening..")
     -- create a box at 50,50
     physics.spawnBox(next_entity_id(), 50, 50, 20)
 end)
@@ -62,7 +62,7 @@ messages.subscribe("new-player", function(peer, msg)
         uniqueid = generate_uniqueid(msg.username),
     }
 
-    print(msg.username .. "#" .. connected_players[peer:index()].uniqueid .. " joined")
+    log.info(msg.username .. "#" .. connected_players[peer:index()].uniqueid .. " joined")
 
     -- Tell the new player about all other players
     for id, ply in pairs(connected_players) do

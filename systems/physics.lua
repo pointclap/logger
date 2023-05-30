@@ -106,7 +106,7 @@ hooks.add("fixed_timestep", function(fixed_timestep)
 end)
 
 messages.subscribe("spawn-box", function(peer, msg)
-    print("spawning a box!")
+    log.info("spawning a box!")
     spawnBox(msg.ent_id, msg.pos_x, msg.pos_y, msg.size)
 end)
 

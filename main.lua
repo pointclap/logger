@@ -1,3 +1,4 @@
+log = require("log")
 hooks = require("hooks")
 messages = require("messages")
 network = require("network")
@@ -38,5 +39,5 @@ function love.keyreleased(key, scancode, isrepeat)
 end
 
 hooks.add("uncaught-message", function(peer, msg)
-    print("[WARN] uncaught message from " .. peer:index() .. ":", messages.encode(msg))
+    log.warn("uncaught message from " .. peer:index() .. ":", messages.encode(msg))
 end)
