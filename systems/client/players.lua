@@ -98,13 +98,14 @@ messages.subscribe("player-left", function(peer, msg)
 end)
 
 messages.subscribe("update-position", function(peer, msg)
-    if tonumber(msg.id) ~= localplayer then
-        local player_id = tonumber(msg.id)
-        if players[player_id] and players[player_id].body then
-            players[player_id].body:setPosition(tonumber(msg.x), tonumber(msg.y))
-            players[player_id].body:setLinearVelocity(tonumber(msg.vx), tonumber(msg.vy))
-            players[player_id].mouseX = tonumber(msg.mouseX)
-            players[player_id].mouseY = tonumber(msg.mouseY)
+    local id = tonumber(msg.id)
+    if id ~= localplayer then
+        local player = entities.get(id)
+        if player and player.body then
+            player.body:setPosition(tonumber(msg.x), tonumber(msg.y))
+            player.body:setLinearVelocity(tonumber(msg.vx), tonumber(msg.vy))
+            player.mouseX = tonumber(msg.mouseX)
+            player.mouseY = tonumber(msg.mouseY)
         end
     end
 end)
