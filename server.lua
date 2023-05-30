@@ -164,7 +164,7 @@ hooks.add("update", function(dt)
     nextupdate = curtime + TICK_RATE
 
     -- Now send the world data to all players
-    for ent_id, ent in entities.all() do
+    for id, ent in entities.all() do
         if ent.body then
             local x, y = ent.body:getPosition()
             local vx, vy = ent.body:getLinearVelocity()
