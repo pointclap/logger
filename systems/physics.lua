@@ -52,7 +52,6 @@ end)
 
 messages.subscribe("update-body", function(peer, msg)
     local player_id = tonumber(msg.id);
-    if player_id == localplayer then return end
 
     local entity = entities.get(tonumber(msg.id))
 

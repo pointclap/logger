@@ -54,7 +54,20 @@ messages.subscribe("new-player", function(peer, msg)
     player_id, player = entities.spawn()
     player.username = msg.username
     player.peer = peer
+    player.move = {
+        x  = 0,
+        y  = 0,
+        dx = 0,
+        dy = 0
+    }
     player_index[peer:index()] = player_id
+
+    local body = physics.new_body("dynamic")
+    local shape = love.physics.newCircleShape(10)
+    local fixture = love.physics.newFixture(body, shape, 5)
+    -- Store the entity id in the body, so we can do collision stuff
+    fixture:setUserData(id)
+    player.body = body
 
     log.info(msg.username .. "(€" .. player_id .. ") joined")
 
@@ -101,6 +114,22 @@ messages.subscribe("new-player", function(peer, msg)
         username = player.username,
         id = player_id
     })
+end)
+
+messages.subscribe("player-move", function(peer, msg)
+    local player_id = player_index[peer:index()]
+    local player = entities.get(player_id)
+    local x = tonumber(msg.x)
+    local y = tonumber(msg.y)
+
+    if player then
+        player.move.dx = player.move.x
+        player.move.dy = player.move.y
+        player.move.x = x
+        player.move.y = y
+    else
+        log.error("player-move called but no player!!")
+    end
 end)
 
 messages.subscribe("report-player-position", function(peer, msg)
@@ -154,6 +183,20 @@ messages.subscribe("player-left", function(peer, msg)
         username = player.username,
         id = player_id
     })
+end)
+
+hooks.add("fixed_timestep", function(fixed_timestep)
+    for id, player in entities.players() do
+        if player.move then
+            if player.move.x ~= 0 or player.move.y ~= 0 then
+                local ms = 100000.0 * fixed_timestep
+                local force_x = player.move.x * ms
+                local force_y = player.move.y * ms
+                print("apply force ("..force_x..", "..force_y..")")
+                player.body:applyForce(force_x, force_y)
+            end
+        end
+    end
 end)
 
 hooks.add("update", function(dt)

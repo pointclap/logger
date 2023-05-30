@@ -82,6 +82,13 @@ messages.subscribe("new-player", function(peer, msg)
         y = 0
     }
 
+    player.move = {
+        x  = 0,
+        y  = 0,
+        dx = 0,
+        dy = 0
+    }
+
     local body = physics.new_body("dynamic")
     local shape = love.physics.newCircleShape(10)
     local fixture = love.physics.newFixture(body, shape, 5)
@@ -110,27 +117,36 @@ hooks.add("fixed_timestep", function(fixed_timestep)
     local player = entities.get(localplayer)
     if player then
         if love.window.hasMouseFocus() then
-            local x, y = love.mouse.getPosition()
-            player.mouseX = x
-            player.mouseY = y
-
-            local ms = 100000.0 * fixed_timestep
-            local force_x = 0
-            local force_y = 0
-
+            player.move.dx = player.move.x
+            player.move.dy = player.move.y
+            
+            local x, y = 0, 0
             if love.keyboard.isDown("d") then
-                force_x = ms
-            elseif love.keyboard.isDown("a") then
-                force_x = -ms
+                x = x + 1
             end
 
+            if love.keyboard.isDown("a") then
+                x = x - 1
+            end
+        
             if love.keyboard.isDown("s") then
-                force_y = ms
-            elseif love.keyboard.isDown("w") then
-                force_y = -ms
+                y = y + 1
             end
 
-            player.body:applyForce(force_x, force_y)
+            if love.keyboard.isDown("w") then
+                y = y - 1
+            end
+
+            player.move.x = x
+            player.move.y = y
+            
+            if player.move.x ~= player.move.dx or player.move.y ~= player.move.y then
+                network.broadcast({
+                    cmd = "player-move",
+                    x = player.move.x,
+                    y = player.move.y
+                })
+            end
         end
     end
 end)
