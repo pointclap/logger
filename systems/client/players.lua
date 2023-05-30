@@ -140,7 +140,7 @@ hooks.add("fixed_timestep", function(fixed_timestep)
             player.move.x = x
             player.move.y = y
             
-            if player.move.x ~= player.move.dx or player.move.y ~= player.move.y then
+            if player.move.x ~= player.move.dx or player.move.y ~= player.move.dy then
                 network.broadcast({
                     cmd = "player-move",
                     x = player.move.x,
