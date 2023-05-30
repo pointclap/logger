@@ -85,7 +85,7 @@ messages.subscribe("new-player", function(peer, msg)
                 ent_id = ent_id,
                 pos_x = x,
                 pos_y = y,
-                size = 20 -- to do: send vert details to/from server 
+                size0 -- to do: send vert details to/from server 
             })
         end
     end
@@ -96,6 +96,26 @@ messages.subscribe("new-player", function(peer, msg)
         username = connected_players[peer:index()].username,
         uniqueid = connected_players[peer:index()].uniqueid,
         id = peer:index()
+    })
+end)
+
+messag.subscribe("update-position", function(peer, msg)
+    network.broadcast({
+        cmd = msg.cmd,
+        id = msg.id,
+        x = msg.x,
+        y = msg.y,
+        vx = msg.vx,
+        vy = msg.vy
+    })
+end)
+
+messages.subscribe("update-mouse", function(peer, msg)
+    network.broadcast({
+        cmd = msg.cmd,
+        id = msg.id,
+        mouseX = msg.mouseX,
+        mouseY = msg.mouseY
     })
 end)
 
