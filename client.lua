@@ -1,11 +1,11 @@
-local debug = require("systems.debug")
+local debug = require("systems.client.debug")
 local physics = require("systems.physics")
-models = require("systems.models")
+models = require("systems.client.models")
 
 local accumulated_deltatime = 0
 local fixed_timestep = 0.008
 
-require("systems.grass")
+require("systems.client.grass")
 require("systems.players")
 
 players = {}
