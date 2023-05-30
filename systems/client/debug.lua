@@ -29,8 +29,8 @@ hooks.add("draw_local", function()
             local mouseY = player.mouseY
 
             if id ~= localplayer and player.interpolated_position then
-                mouseX = mouseX + player.interpolated_position.x - players[localplayer].interpolated_position.x
-                mouseY = mouseY + player.interpolated_position.y - players[localplayer].interpolated_position.y
+                mouseX = mouseX + player.interpolated_position.x - player.interpolated_position.x
+                mouseY = mouseY + player.interpolated_position.y - player.interpolated_position.y
             end
 
             mouse_text:set("mouseX: " .. player.mouseX)
