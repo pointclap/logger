@@ -39,7 +39,7 @@ hooks.add("update", function(dt)
             })
 
             if event.type == "receive" then
-                log.debug("received message: ", event.data)
+                log.trace("received message: ", event.data)
                 local encoded_message = messages.decode(event.data);
                 -- Submit message to subscribers, calling the 'uncaught-message'
                 -- hook if nobody is subscribed to the message.
