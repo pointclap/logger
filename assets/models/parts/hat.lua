@@ -3,7 +3,8 @@ local hat = {
     image = image,
     selector = {
         animation = function(entity) return "idle" end,
-        direction = models.selectors.direction.from_velocity
+        direction = models.selectors.direction.from_velocity,
+        colour = models.selectors.colour.from_entity,
     },
     animations = {
         idle = {
