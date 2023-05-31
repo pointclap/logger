@@ -1,30 +1,21 @@
 local directions = {"w", "nw", "n", "ne", "e", "se", "s", "sw"}
 
-local world_image = love.graphics.newImage("assets/models/tiny-town.png");
-local world_tiles = {
-    image = world_image,
-    tiles = {
-        shortgrass = love.graphics.newQuad(    0, 0, 16, 16, world_image),
-        longgrass  = love.graphics.newQuad(   16, 0, 16, 16, world_image),
-        flowers    = love.graphics.newQuad(   32, 0, 16, 16, world_image)
-    }
-}
-
-local character_image = love.graphics.newImage("assets/models/character.png");
+local character_image = love.graphics.newImage("assets/textures/character.png");
 local character = {
     image = character_image,
+    default_animaton = "stand",
     animation_selector = function(player)
         local x, y = player.body:getLinearVelocity()
 
         if x*x+y*y < 10 then
-            if player.animated.animation ~= "stand" then
-                player.animated.animation = "stand"
-                player.animated.frame = 1
+            if player.animation.current_animation ~= "stand" then
+                player.animation.current_animation = "stand"
+                player.animation.frame = 1
             end
         else
-            if player.animated.animation ~= "walk" then
-                player.animated.animation = "walk"
-                player.animated.frame = 1
+            if player.animation.current_animation ~= "walk" then
+                player.animation.current_animation = "walk"
+                player.animation.frame = 1
             end
 
             -- take the angle of the velocity, divide it into 8 equal parts and assign
@@ -38,7 +29,7 @@ local character = {
         x = player.mouseX - w / 2
         y = player.mouseY - h / 2
         local angle = math.floor(((math.atan2(y, x) + math.pi) / (2*math.pi) * 8 + (1/16)) % 8) + 1
-        player.animated.direction = directions[angle]
+        player.animation.direction = directions[angle]
     end,
     animations = {
         stand = {
@@ -104,64 +95,4 @@ local character = {
     }
 }
 
-local models = {
-    character = character
-}
-
-local function set_model(entity_id, model)
-    local model = models[model]
-
-    entities.get(entity_id).animated = {
-        model = model,
-        frame = 1,
-        frametime = 0,
-        direction = "s",
-    }
-end
-
-hooks.add("update", function(dt)
-    for _, player in entities.players() do
-        if player.animated then
-            if player.animated.model.animation_selector then
-                player.animated.model.animation_selector(player)
-            end
-
-            player.animated.frametime = player.animated.frametime + dt
-
-            local directed_animation = player.animated.model.animations[player.animated.animation][player.animated.direction]
-
-            if player.animated.frametime > directed_animation[player.animated.frame].time then
-                player.animated.frametime = 0
-                player.animated.frame = (player.animated.frame + 1)
-
-                if not directed_animation[player.animated.frame] then
-                    player.animated.frame = 1
-                end
-            end
-        end
-    end
-end)
-
-hooks.add("draw_world", function()
-    love.graphics.setColor(1, 1, 1, 1)
-
-    for _, tile in pairs(tiles) do
-        local quad = world_tiles.tiles[tile.type]
-        local x, y, w, h = quad:getViewport()
-
-        love.graphics.draw(world_image, quad, tile.position.x - w / 2, tile.position.y - h / 2)
-    end
-
-    for _, player in entities.players() do
-        if player.animated then
-            local quad = player.animated.model.animations[player.animated.animation][player.animated.direction][player.animated.frame].quad
-            local x, y, w, h = quad:getViewport()
-
-            love.graphics.draw(player.animated.model.image, quad, player.interpolated_position.x - w / 2, player.interpolated_position.y - h / 2)
-        end
-    end
-end)
-
-return {
-    set_model = set_model
-}
+return character

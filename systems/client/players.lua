@@ -103,7 +103,7 @@ messages.subscribe("new-player", function(peer, msg)
     fixture:setUserData(id)
     player.body = body
 
-    models.set_model(id, "character")
+    animation.set_animation(id, "character")
     labels.set_label(id, msg.username)
 end)
 

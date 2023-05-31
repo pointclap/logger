@@ -77,7 +77,7 @@ hooks.add("load", function()
     end
 
     grass_mesh = love.graphics.newMesh(vertices, "triangles", "static")
-    grass_mesh:setTexture(love.graphics.newImage("assets/models/grass.png"))
+    grass_mesh:setTexture(love.graphics.newImage("assets/textures/grass.png"))
 end)
 
 hooks.add("draw_local_pre", function()
