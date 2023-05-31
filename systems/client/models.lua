@@ -1,5 +1,14 @@
-
 local directions = {"w", "nw", "n", "ne", "e", "se", "s", "sw"}
+
+local world_image = love.graphics.newImage("assets/models/tiny-town.png");
+local world_tiles = {
+    image = world_image,
+    tiles = {
+        shortgrass = love.graphics.newQuad(    0, 0, 16, 16, world_image),
+        longgrass  = love.graphics.newQuad(   16, 0, 16, 16, world_image),
+        flowers    = love.graphics.newQuad(   32, 0, 16, 16, world_image)
+    }
+}
 
 local character_image = love.graphics.newImage("assets/models/character.png");
 local character = {
@@ -134,8 +143,16 @@ hooks.add("update", function(dt)
 end)
 
 hooks.add("draw_world", function()
+    love.graphics.setColor(1, 1, 1, 1)
+
+    for _, tile in pairs(tiles) do
+        local quad = world_tiles.tiles[tile.type]
+        local x, y, w, h = quad:getViewport()
+
+        love.graphics.draw(world_image, quad, tile.position.x - w / 2, tile.position.y - h / 2)
+    end
+
     for _, player in entities.players() do
-        love.graphics.setColor(1, 1, 1, 1)
         if player.animated then
             local quad = player.animated.model.animations[player.animated.animation][player.animated.direction][player.animated.frame].quad
             local x, y, w, h = quad:getViewport()

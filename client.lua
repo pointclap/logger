@@ -84,3 +84,14 @@ messages.subscribe("spawn-circle", function(peer, msg)
     entity.body = body
     entity.radius = radius
 end)
+
+messages.subscribe("update-tile", function(peer, msg)
+    local id = tonumber(msg.id)
+    local newtile = {}
+    newtile.position = {
+        x = tonumber(msg.x),
+        y = tonumber(msg.y)
+    }
+    newtile.type = msg.type
+    tiles[id] = newtile
+end)

@@ -1,4 +1,5 @@
 local world = nil
+tiles = {}
 local velocity_iterations = 8
 local position_iterations = 3
 local drag_coefficient = 5

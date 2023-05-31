@@ -62,6 +62,32 @@ hooks.add("load", function(args)
         local min, max = -500, 500
         spawnCircle(love.math.random(min, max), love.math.random(min, max), love.math.random(10, 30))
     end
+
+    
+    -- generate world icons
+    --  1<=x<= 6 : short grass
+    --  7<=x<= 9 : long grass
+    --     x =10 : flowers
+
+    for i = -20, 20 do
+        for k = -20, 20 do
+            local newtile = {}
+            newtile.position = {
+                x = k * 16,
+                y = i * 16
+            }
+            local n = math.random(1, 10)
+            if n == 10 then
+                newtile.type = "flowers"
+            elseif n >= 7 and n <= 9 then
+                newtile.type = "longgrass"
+            else
+                newtile.type = "shortgrass"
+            end
+
+            table.insert(tiles, newtile)
+        end
+    end
 end)
 
 hooks.add("uncaught-message", function(peer, msg)
@@ -117,6 +143,17 @@ messages.subscribe("new-player", function(peer, msg)
             cmd = "entity-spawned",
             id = id
         });
+
+        -- send server world tiles
+        for k, tile in pairs(tiles) do
+            peer:send({
+                cmd = "update-tile",
+                id = k,
+                x = tile.position.x,
+                y = tile.position.y,
+                type = tile.type
+            })
+        end
 
         if entity.is_box and entity.body then
             local x, y = entity.body:getPosition()
