@@ -13,7 +13,8 @@ local function set_model(entity_id, model)
             frame = 1,
             direction = "s",
             animation = next(part.part.animations),
-            frametime = 0
+            frametime = 0,
+            color = {1.0, 1.0, 1.0, 1.0}
         }
     end
 
@@ -68,10 +69,10 @@ hooks.add("update", function(dt)
 end)
 
 hooks.add("draw_world", function()
-    love.graphics.setColor(1, 1, 1, 1)
     for _, entity in entities.all() do
         if entity.interpolated_position and entity.parts then
             for _, part in ipairs(entity.parts) do
+                love.graphics.setColor(unpack(part.color))
                 local frame = part.part.animations[part.animation][part.direction][part.frame]
 
                 local x = entity.interpolated_position.x + part.offset.x + frame.x

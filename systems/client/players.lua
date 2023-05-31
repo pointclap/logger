@@ -106,6 +106,7 @@ messages.subscribe("new-player", function(peer, msg)
     player.body = body
 
     models.set_model(id, character)
+    
     labels.set_label(id, msg.username)
 end)
 

@@ -15,6 +15,14 @@ local character = {
                 x = 0,
                 y = -8
             }
+        },
+        {
+            name = "hat",
+            part = require("assets.models.parts.hat"),
+            offset = {
+                x = 0,
+                y = -10
+            }
         }
     }
 }
