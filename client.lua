@@ -64,3 +64,23 @@ messages.subscribe("spawn-box", function(peer, msg)
     entity.body = body
     entity.vertices = {shape:getPoints()}
 end)
+
+messages.subscribe("spawn-circle", function(peer, msg)
+    local id = tonumber(msg.id)
+    local x, y = tonumber(msg.pos_x), tonumber(msg.pos_y)
+    local radius = tonumber(msg.radius)
+
+    local body = physics.new_body("static")
+    body:setPosition(x, y)
+    local shape = love.physics.newCircleShape(radius)
+    local fixture = love.physics.newFixture(body, shape, 5)
+    fixture:setUserData(id)
+
+    local entity = entities.get(id)
+    entity.interpolated_position = {
+        x = x,
+        y = y
+    }
+    entity.body = body
+    entity.radius = radius
+end)

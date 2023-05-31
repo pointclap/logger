@@ -6,8 +6,10 @@ physics = require("systems.physics")
 
 function love.load(args)
     if not args[1] then
+        log.debug("starting server")
         require("server")
     else
+        log.debug("starting client")
         require("client")
     end
 

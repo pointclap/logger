@@ -52,15 +52,18 @@ end)
 
 messages.subscribe("update-body", function(peer, msg)
     local player_id = tonumber(msg.id);
-    if player_id == localplayer then return end
 
     local entity = entities.get(tonumber(msg.id))
 
     if not entity then return end
-
+    
     if entity.body then
         entity.body:setPosition(tonumber(msg.x), tonumber(msg.y))
         entity.body:setLinearVelocity(tonumber(msg.vx), tonumber(msg.vy))
+
+        if entity.player then
+            entity.body.applyForce(tonumber(msg.ax), tonumber(msg.ay))
+        end
     end
 end)
 
@@ -87,6 +90,8 @@ hooks.add("draw_world", function()
                     end
 
                     love.graphics.polygon("line", verts)
+                elseif shape:getType() == "circle" and ent.radius then
+                    love.graphics.circle("line", x, y, ent.radius)
                 end
             end
         end
