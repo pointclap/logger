@@ -86,7 +86,6 @@ local function direction_from_mouse(entity)
         local w, h = love.graphics:getDimensions()
         x = entity.mouseX - w / 2
         y = entity.mouseY - h / 2
-        log.error(entity.mouseX, entity.mouseY)
         local angle = math.floor(((math.atan2(y, x) + math.pi) / (2*math.pi) * 8 + (1/16)) % 8) + 1
         return directions[angle]
     else
