@@ -4,7 +4,7 @@ end)
 
 local debug = require("systems.client.debug")
 entities = require("systems.client.entities")
-animation = require("systems.client.animation")
+models = require("systems.client.models")
 require("systems.client.pong")
 
 labels = require("systems.client.labels")

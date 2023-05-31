@@ -1,6 +1,7 @@
 local character = {
     parts = {
-        body = {
+        {
+            name = "body",
             part = require("assets.models.parts.whole_character"),
             offset = {
                 x = 0,
