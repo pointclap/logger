@@ -27,7 +27,7 @@ hooks.add("update", function(dt)
                 if part.part.selector then
                     if part.part.selector.animation then
                         local selected = part.part.selector.animation(entity)
-                        if selected ~= part.animation then
+                        if selected and selected ~= part.animation then
                             part.animation = selected
                             part.frametime = 0.0
                             part.frame = 1
@@ -35,7 +35,7 @@ hooks.add("update", function(dt)
                     end
                     if part.part.selector.direction then
                         local selected = part.part.selector.direction(entity)
-                        if selected ~= part.direction then
+                        if selected and selected ~= part.direction then
                             part.direction = selected
                             part.frametime = 0.0
                             part.frame = 1
@@ -56,7 +56,11 @@ hooks.add("update", function(dt)
 
                 if part.frametime > directed_animation[part.frame].time then
                     part.frametime = part.frametime % directed_animation[part.frame].time
-                    part.frame = (part.frame + 1) % #directed_animation + 1
+                    part.frame = part.frame + 1
+                end
+
+                if not directed_animation[part.frame] then
+                    part.frame = 1
                 end
             end
         end
@@ -70,8 +74,8 @@ hooks.add("draw_world", function()
             for _, part in ipairs(entity.parts) do
                 local frame = part.part.animations[part.animation][part.direction][part.frame]
 
-                local x = entity.interpolated_position.x + frame.x + part.offset.x
-                local y = entity.interpolated_position.y + frame.y + part.offset.y
+                local x = entity.interpolated_position.x + part.offset.x + frame.x
+                local y = entity.interpolated_position.y + part.offset.y + frame.y
 
                 love.graphics.draw(part.part.image, frame.quad, x, y)
             end
@@ -81,7 +85,6 @@ hooks.add("draw_world", function()
 end)
 
 local function direction_from_mouse(entity)
-    -- get angle from player to their mouse
     if entity.mouseX and entity.mouseY then
         local w, h = love.graphics:getDimensions()
         x = entity.mouseX - w / 2
@@ -90,6 +93,17 @@ local function direction_from_mouse(entity)
         return directions[angle]
     else
         return "s"
+    end
+end
+
+local function direction_from_velocity(entity)
+    if entity.body then
+        local x, y = entity.body:getLinearVelocity()
+
+        if math.abs(x)+math.abs(y) > 1 then
+            local angle = math.floor(((math.atan2(y, x) + math.pi) / (2*math.pi) * 8 + (1/16)) % 8) + 1
+            return directions[angle]
+        end
     end
 end
 
@@ -123,7 +137,8 @@ return {
     directions = directions,
     selectors = {
         direction = {
-            from_mouse = direction_from_mouse
+            from_mouse = direction_from_mouse,
+            from_velocity = direction_from_velocity,
         },
         animation = {
             from_velocity = animation_from_velocity

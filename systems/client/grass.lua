@@ -81,7 +81,8 @@ hooks.add("load", function()
 end)
 
 hooks.add("draw_local_pre", function()
-    if localplayer then
+    local player = entities.get(localplayer)
+    if player and player.interpolated_position then
         love.graphics.setColor(0.1, 0.4, 0.1, 1.0)
         local width, height = love.graphics.getDimensions()
         love.graphics.rectangle("fill", 0, 0, width, height)

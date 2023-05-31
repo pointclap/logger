@@ -124,7 +124,7 @@ end)
 
 hooks.add("fixed_timestep", function(fixed_timestep)
     local player = entities.get(localplayer)
-    if player then
+    if player and player.move then
         if love.window.hasFocus() then
             player.move.dx = player.move.x
             player.move.dy = player.move.y
@@ -178,7 +178,7 @@ hooks.add("update", function(dt)
     countdown = countdown - dt
     if countdown < 0 then
         local player = entities.get(localplayer)
-        if player then
+        if player and player.body then
             local x, y = player.body:getPosition()
             local vx, vy = player.body:getLinearVelocity()
 

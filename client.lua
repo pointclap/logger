@@ -32,7 +32,7 @@ hooks.add("draw", function()
 
     local width, height = love.graphics.getDimensions()
     local player = entities.get(localplayer)
-    if player then
+    if player and player.interpolated_position then
         love.graphics.push()
         love.graphics.translate(-player.interpolated_position.x + width / 2,
             -player.interpolated_position.y + height / 2)
