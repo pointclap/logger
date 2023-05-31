@@ -1,35 +1,13 @@
-local directions = {"w", "nw", "n", "ne", "e", "se", "s", "sw"}
-
 local character_image = love.graphics.newImage("assets/textures/character.png");
 local character = {
     image = character_image,
-    animation_selector = function(player)
-        local x, y = player.body:getLinearVelocity()
-
-        if x*x+y*y < 10 then
-            if player.animation.current_animation ~= "stand" then
-                player.animation.current_animation = "stand"
-                player.animation.frame = 1
-            end
-        else
-            if player.animation.current_animation ~= "walk" then
-                player.animation.current_animation = "walk"
-                player.animation.frame = 1
-            end
-
-            -- take the angle of the velocity, divide it into 8 equal parts and assign
-            -- each of them to one animation direction.
-            -- local angle = math.floor(((math.atan2(y, x) + math.pi) / (2*math.pi) * 8 + (1/16)) % 8) + 1
-            -- player.animated.direction = directions[angle]
-        end
-    
-        -- get angle from player to their mouse
-        local w, h = love.graphics:getDimensions()
-        x = player.mouseX - w / 2
-        y = player.mouseY - h / 2
-        local angle = math.floor(((math.atan2(y, x) + math.pi) / (2*math.pi) * 8 + (1/16)) % 8) + 1
-        player.animation.direction = directions[angle]
-    end,
+    selector = {
+        animation = models.selectors.animation.from_velocity({
+            {0, "stand"},
+            {10, "walk"},
+        }),
+        direction = models.selectors.direction.from_mouse
+    },
     animations = {
         stand = {
             s  = { { quad = love.graphics.newQuad(   0, 0, 16, 16 , character_image), time = 1.0, x = -8, y = -8 } },

@@ -1,17 +1,11 @@
-local models = {
-    character = require("assets.models.character")
-}
+local directions = {"w", "nw", "n", "ne", "e", "se", "s", "sw"}
 
-local function set_model(entity_id, model_name)
-    if not models[model_name] then
-        log.warn("attempted to unknown model " .. model_name .. " for entity €" .. entity_id)
-    end
-
+local function set_model(entity_id, model)
     -- Models are templates, so we need to do a semi-deep copy of each part
     -- for the entity, so we can store frame and animation data alongside
     -- each part without thrashing around in the "real" part table.
     local parts = {}
-    for part_id, part in ipairs(models[model_name].parts) do
+    for part_id, part in ipairs(model.parts) do
         parts[part_id] = {
             part_name = part.name,
             part = part.part,
@@ -25,6 +19,33 @@ local function set_model(entity_id, model_name)
 
     entities.get(entity_id).parts = parts
 end
+
+hooks.add("update", function(dt)
+    for _, entity in entities.all() do
+        if entity.parts then
+            for _, part in ipairs(entity.parts) do
+                if part.part.selector then
+                    if part.part.selector.animation then
+                        local selected = part.part.selector.animation(entity)
+                        if selected ~= part.animation then
+                            part.animation = selected
+                            part.frametime = 0.0
+                            part.frame = 1
+                        end
+                    end
+                    if part.part.selector.direction then
+                        local selected = part.part.selector.direction(entity)
+                        if selected ~= part.direction then
+                            part.direction = selected
+                            part.frametime = 0.0
+                            part.frame = 1
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
 
 hooks.add("update", function(dt)
     for _, entity in entities.all() do
@@ -59,6 +80,54 @@ hooks.add("draw_world", function()
     end
 end)
 
+local function direction_from_mouse(entity)
+    -- get angle from player to their mouse
+    if entity.mouseX and entity.mouseY then
+        local w, h = love.graphics:getDimensions()
+        x = entity.mouseX - w / 2
+        y = entity.mouseY - h / 2
+        log.error(entity.mouseX, entity.mouseY)
+        local angle = math.floor(((math.atan2(y, x) + math.pi) / (2*math.pi) * 8 + (1/16)) % 8) + 1
+        return directions[angle]
+    else
+        return "s"
+    end
+end
+
+-- call using:
+--   {{0, "stand"}, {10, "walk"}, {20, "run"}, {100, "fly"}}
+-- for example
+local function animation_from_velocity(velocity_cutoffs)
+    return function(entity)
+        if entity.body then
+            local x, y = entity.body:getLinearVelocity()
+            
+            local squared_velocity = x*x+y*y
+
+            -- go through the velocity cutoffs backwards, returning
+            --  the first one that is below our current velocity
+            for i = #velocity_cutoffs, 1, -1 do
+                local v = velocity_cutoffs[i]
+                if squared_velocity > v[1]*v[1] then
+                    return v[2]
+                end
+            end
+
+            -- default to first one
+            return velocity_cutoffs[1][2]
+        end
+    end
+end
+
 return {
-    set_model = set_model
+    set_model = set_model,
+    directions = directions,
+    selectors = {
+        direction = {
+            from_mouse = direction_from_mouse
+        },
+        animation = {
+            from_velocity = animation_from_velocity
+        }
+    }
 }
