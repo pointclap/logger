@@ -95,7 +95,12 @@ messages.subscribe("new-player", function(peer, msg)
         x  = 0,
         y  = 0,
         dx = 0,
-        dy = 0
+        dy = 0,
+
+        lmb  = 0,
+        rmb  = 0,
+        dlmb = 0,
+        drmb = 0
     }
 
     local body = physics.new_body("dynamic")
@@ -120,6 +125,8 @@ messages.subscribe("update-mouse", function(peer, msg)
         local player = entities.get(player_id)
         player.mouse.x = tonumber(msg.x)
         player.mouse.y = tonumber(msg.y)
+        player.mouse.lmb = tonumber(msg.lmb)
+        player.mouse.rmb = tonumber(msg.rmb)
     end
 end)
 
@@ -129,7 +136,7 @@ hooks.add("fixed_timestep", function(fixed_timestep)
         if love.window.hasFocus() then
             player.move.dx = player.move.x
             player.move.dy = player.move.y
-            
+
             local x, y = 0, 0
             if love.keyboard.isDown("d") then
                 x = x + 1
@@ -160,14 +167,31 @@ hooks.add("fixed_timestep", function(fixed_timestep)
 
             player.mouse.dx = player.mouse.x
             player.mouse.dy = player.mouse.y
+            player.mouse.dlmb = player.mouse.lmb
+            player.mouse.drmb = player.mouse.drmb
 
             player.mouse.x, player.mouse.y = love.mouse:getPosition()
             
-            if player.mouse.x ~= player.mouse.dx or player.mouse.y ~= player.mouse.dy then
+            if love.mouse.isDown(1) then
+                player.mouse.lmb = 1
+            else
+                player.mouse.lmb = 0
+            end
+
+            if love.mouse.isDown(2) then
+                player.mouse.rmb = 1
+            else
+                player.mouse.rmb = 0
+            end
+            
+            if player.mouse.x   ~= player.mouse.dx   or player.mouse.y   ~= player.mouse.dy or
+               player.mouse.lmb ~= player.mouse.dlmb or player.mouse.rmb ~= player.mouse.drmb then
                 network.broadcast({
                     cmd = "update-mouse",
                     x = player.mouse.x,
-                    y = player.mouse.y
+                    y = player.mouse.y,
+                    lmb = player.mouse.lmb,
+                    rmb = player.mouse.rmb
                 })
             end
         end
@@ -219,9 +243,9 @@ hooks.add("draw_local", function()
                 mouseY = mouseY - 0
 
                 --love.graphics.circle("fill", mouseX, mouseY, 3)
-                if love.mouse.isDown(1) then
+                if player.mouse.lmb == 1 then
                     love.graphics.draw(cursors.point.image,  cursors.point.quad,   mouseX, mouseY)
-                elseif love.mouse.isDown(2) then
+                elseif player.mouse.rmb == 1 then
                     love.graphics.draw(cursors.closed.image, cursors.closed.quad, mouseX, mouseY)
                 else
                     love.graphics.draw(cursors.open.image,   cursors.open.quad,   mouseX, mouseY)

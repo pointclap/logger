@@ -119,7 +119,9 @@ messages.subscribe("new-player", function(peer, msg)
     }
     player.mouse = {
         x = 0,
-        y = 0
+        y = 0,
+        lmb = false,
+        rmb = false
     }
     player_index[peer:index()] = player_id
 
@@ -224,21 +226,29 @@ messages.subscribe("update-mouse", function(peer, msg)
     local player = entities.get(player_id)
     local x = tonumber(msg.x)
     local y = tonumber(msg.y)
+    local lmb = tonumber(msg.lmb)
+    local rmb = tonumber(msg.rmb)
 
     if player then
         player.mouse.x = x
         player.mouse.y = y
+        player.mouse.lmb = lmb
+        player.mouse.rmb = rmb
     else
         log.error("update-mouse called but no player!!")
         return
     end
     
     -- relay mouse position to all connected players
+    -- ideally we only broadcast new values to players
+    -- instead of assuming the peer only sent us new values
     network.broadcast({
         cmd = "update-mouse",
         id = player_id,
         x = x,
-        y = y
+        y = y,
+        lmb = lmb,
+        rmb = rmb
     })
 end)
 
