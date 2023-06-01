@@ -182,30 +182,22 @@ hooks.add("update", function(dt)
         if player and player.body then
             local x, y = player.body:getPosition()
             local vx, vy = player.body:getLinearVelocity()
-
-            -- network.broadcast({
-            --     cmd = "report-player-position",
-            --     id = localplayer,
-            --     x = x,
-            --     y = y,
-            --     vx = vx,
-            --     vy = vy
-            -- })
-
-            -- network.broadcast({
-            --     cmd = "update-mouse",
-            --     id = localplayer,
-            --     mouseX = player.mouseX,
-            --     mouseY = player.mouseY
-            -- })
         end
         countdown = 0.1
+    end
+    
+    if love.mouse.isDown(1) then
+        love.mouse.setCursor(cursors.point.cursor)
+    elseif love.mouse.isDown(2) then
+        love.mouse.setCursor(cursors.closed.cursor)
+    else
+        love.mouse.setCursor(cursors.open.cursor)
     end
 end)
 
 hooks.add("draw_local", function()
     local player = entities.get(localplayer)
-    if not player then
+    if not player or not player.interpolated_position then
         return
     end
 
@@ -221,9 +213,20 @@ hooks.add("draw_local", function()
             if id ~= localplayer and player.interpolated_position then
                 mouseX = mouseX + player.interpolated_position.x - x
                 mouseY = mouseY + player.interpolated_position.y - y
-            end
+                    
+                -- offset the quad so the index finger lines up with actual cursor point
+                mouseX = mouseX - 15
+                mouseY = mouseY - 0
 
-            love.graphics.circle("fill", mouseX, mouseY, 3)
+                --love.graphics.circle("fill", mouseX, mouseY, 3)
+                if love.mouse.isDown(1) then
+                    love.graphics.draw(cursors.point.image,  cursors.point.quad,   mouseX, mouseY)
+                elseif love.mouse.isDown(2) then
+                    love.graphics.draw(cursors.closed.image, cursors.closed.quad, mouseX, mouseY)
+                else
+                    love.graphics.draw(cursors.open.image,   cursors.open.quad,   mouseX, mouseY)
+                end
+            end
         end
     end
 end)

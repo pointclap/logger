@@ -4,6 +4,7 @@ end)
 
 local debug = require("systems.client.debug")
 entities = require("systems.client.entities")
+cursors = require("assets.models.parts.cursor")
 models = require("systems.client.models")
 require("systems.client.pong")
 
