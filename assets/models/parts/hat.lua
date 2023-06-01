@@ -1,4 +1,5 @@
 local image = love.graphics.newImage("assets/textures/hat.png");
+---@type Part
 local hat = {
     image = image,
     selector = {

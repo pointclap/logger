@@ -1,3 +1,4 @@
+
 local directions = {"w", "nw", "n", "ne", "e", "se", "s", "sw"}
 
 local function set_model(entity_id, model)
@@ -135,9 +136,27 @@ local function colour_from_entity(entity)
     return {entity.colour.r, entity.colour.g, entity.colour.b, entity.colour.a}
 end
 
--- call using:
---   {{0, "stand"}, {10, "walk"}, {20, "run"}, {100, "fly"}}
--- for example
+
+---@class VelocityCutoff
+---@field public velocity number @velocity at which this animation is activated.
+---@field public animation string @name of animation to activate.
+
+--- Sets the *part*'s current animation based on the velocity of
+--- the physics body (if any) of the entity to which the part
+--- is assigned.
+---
+--- For example:
+---
+--- ```lua
+--- models.selector.animation.from_velocity({
+--- {velocity =  0.0, animation = "idle"},
+---   {velocity = 10.0, animation = "walk"},
+---   {velocity = 30.0, animation =  "run"},
+--- })
+--- ```
+--- 
+---@param velocity_cutoffs VelocityCutoff[] @list of cutoffs.
+---@return function @selector which deduces current animation from an entity
 local function animation_from_velocity(velocity_cutoffs)
     return function(entity)
         if entity.body then
@@ -146,20 +165,48 @@ local function animation_from_velocity(velocity_cutoffs)
             local squared_velocity = x*x+y*y
 
             -- go through the velocity cutoffs backwards, returning
-            --  the first one that is below our current velocity
+            -- the first one that is below our current velocity
             for i = #velocity_cutoffs, 1, -1 do
-                local v = velocity_cutoffs[i]
-                if squared_velocity > v[1]*v[1] then
-                    return v[2]
+                local cutoff = velocity_cutoffs[i]
+                if squared_velocity > cutoff.velocity*cutoff.velocity then
+                    return cutoff.animation
                 end
             end
 
             -- default to first one
-            return velocity_cutoffs[1][2]
+            return velocity_cutoffs[1].animation
         end
     end
 end
 
+---@class Image @created with `love.graphics.newImage("assets/textures/...")`
+
+---@class Direction: string @One of n, ne, e, se, s, sw, w, nw
+
+---@class AnimationSelector: function(entity: Entity): string @Name of the animation to use
+---@class DirectionSelector: function(entity: Entity): Direction
+---@class ColourSelector: function(entity: Entity): number[4]
+
+---@class Selectors @table of functions for deriving attributes of the part from its associated entity
+---@field animation AnimationSelector?
+---@field direction DirectionSelector?
+---@field colour ColourSelector?
+
+---@class Quad @from `love.graphics.newQuad`
+
+---@class Frame
+---@field quad Quad
+---@field time number @time in seconds for this frame to run before switching to the next one.
+---@field x number? @x-offset of this frame relative to the part.
+---@field y number? @y-offset of this frame relative to the part.
+
+---@alias Frames Frame[] @array of `Frame`s
+---@alias Animation table<Direction, Frames> @Table of directions and their associated animations.
+
+---@class Part @An animated part
+---@field image Image @Source spritesheet from which the quads are rendered.
+---@field selector Selectors? @Optional selectors for part attributes
+---@field animations table<string, Animation>
 return {
     set_model = set_model,
     directions = directions,
@@ -175,5 +222,5 @@ return {
         colour = {
             from_entity = colour_from_entity
         }
-    }
+    },
 }

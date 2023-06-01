@@ -1,10 +1,11 @@
 local image = love.graphics.newImage("assets/textures/body.png");
+---@type Part
 local body = {
     image = image,
     selector = {
         animation = models.selectors.animation.from_velocity({
-            {0, "stand"},
-            {10, "walk"},
+            {velocity =  0, animation = "stand"},
+            {velocity = 10, animation = "walk"},
         }),
         direction = models.selectors.direction.from_velocity
     },
@@ -44,25 +45,25 @@ local body = {
                 { quad = love.graphics.newQuad( 35, 30,  8,  9, image), time = 0.1, x = -4, y = -4 },
                 { quad = love.graphics.newQuad( 35, 40,  8,  9, image), time = 0.1, x = -4, y = -4 },
             },
-            nw  = { 
+            nw = { 
                 { quad = love.graphics.newQuad( 44, 10, 8,  9, image), time = 0.1, x = -4, y = -4 },
                 { quad = love.graphics.newQuad( 44, 20, 8,  9, image), time = 0.1, x = -4, y = -4 },
                 { quad = love.graphics.newQuad( 44, 30, 8,  9, image), time = 0.1, x = -4, y = -4 },
                 { quad = love.graphics.newQuad( 44, 40, 8,  9, image), time = 0.1, x = -4, y = -4 },
             },
-            ne  = { 
+            ne = { 
                 { quad = love.graphics.newQuad( 53, 10, 8,  9, image), time = 0.1, x = -4, y = -4 },
                 { quad = love.graphics.newQuad( 53, 20, 8,  9, image), time = 0.1, x = -4, y = -4 },
                 { quad = love.graphics.newQuad( 53, 30, 8,  9, image), time = 0.1, x = -4, y = -4 },
                 { quad = love.graphics.newQuad( 53, 40, 8,  9, image), time = 0.1, x = -4, y = -4 },
             },
-            sw  = {
+            sw = {
                 { quad = love.graphics.newQuad( 62, 10, 7,  9, image), time = 0.1, x = -4, y = -4 },
                 { quad = love.graphics.newQuad( 62, 20, 7,  9, image), time = 0.1, x = -4, y = -4 },
                 { quad = love.graphics.newQuad( 62, 30, 7,  9, image), time = 0.1, x = -4, y = -4 },
                 { quad = love.graphics.newQuad( 62, 40, 7,  9, image), time = 0.1, x = -4, y = -4 },
             },
-            se  = {
+            se = {
                 { quad = love.graphics.newQuad( 70, 10, 7,  9, image), time = 0.1, x = -3, y = -4 },
                 { quad = love.graphics.newQuad( 70, 20, 7,  9, image), time = 0.1, x = -3, y = -4 },
                 { quad = love.graphics.newQuad( 70, 30, 7,  9, image), time = 0.1, x = -3, y = -4 },
