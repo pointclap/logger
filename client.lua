@@ -1,9 +1,13 @@
+SERVER = false
+CLIENT = true
+
 hooks.add("uncaught-message", function(peer, msg)
     network.broadcast(msg)
 end)
 
-local debug = require("systems.client.debug")
 entities = require("systems.client.entities")
+
+local debug = require("systems.client.debug")
 cursors = require("assets.models.parts.cursor")
 models = require("systems.client.models")
 require("systems.client.pong")
@@ -46,44 +50,19 @@ end)
 
 messages.subscribe("spawn-box", function(peer, msg)
     local id = tonumber(msg.id)
-    local x, y = tonumber(msg.pos_x), tonumber(msg.pos_y)
-    local size = tonumber(msg.size)
+    local x, y = tonumber(msg.x), tonumber(msg.y)
+    local width = tonumber(msg.width)
+    local height = tonumber(msg.height)
 
-    local body = physics.new_body("dynamic");
-    body:setPosition(x, y)
-    local shape = love.physics.newPolygonShape(-size / 2, -size / 2, size / 2, -size / 2, size / 2, size / 2, -size / 2,
-        size / 2)
-
-    local fixture = love.physics.newFixture(body, shape, 5)
-    fixture:setUserData(id)
-
-    local entity = entities.get(id)
-    entity.interpolated_position = {
-        x = x,
-        y = y
-    }
-    entity.body = body
-    entity.vertices = {shape:getPoints()}
+    physics.spawnBox(id, x, y, width, height)
 end)
 
 messages.subscribe("spawn-circle", function(peer, msg)
     local id = tonumber(msg.id)
-    local x, y = tonumber(msg.pos_x), tonumber(msg.pos_y)
+    local x, y = tonumber(msg.x), tonumber(msg.y)
     local radius = tonumber(msg.radius)
 
-    local body = physics.new_body("static")
-    body:setPosition(x, y)
-    local shape = love.physics.newCircleShape(radius)
-    local fixture = love.physics.newFixture(body, shape, 5)
-    fixture:setUserData(id)
-
-    local entity = entities.get(id)
-    entity.interpolated_position = {
-        x = x,
-        y = y
-    }
-    entity.body = body
-    entity.radius = radius
+    physics.spawnCircle(id, x, y, radius)
 end)
 
 messages.subscribe("update-tile", function(peer, msg)

@@ -30,7 +30,7 @@ hooks.add("draw_local", function()
 
             if id ~= localplayer and player.interpolated_position then
                 x = mouse.x + player.interpolated_position.x - player.interpolated_position.x
-                y = mouse.y + player.interpolated_position.y - player.interpolated_position.y
+                y = mouse.y + player.interpolated_zposition.y - player.interpolated_position.y
             end
 
             mouse_text:set("mouse.x: " .. player.mouse.x)
@@ -44,6 +44,17 @@ end)
 hooks.add("draw_world", function()
     if not debug_mode then return end
 
+    love.graphics.setColor(1, 1, 1, 1)
+
+    for _, entity in entities.all() do
+        if entity then
+            if entity.body then
+                local x, y = entity.body:getPosition()
+                love.graphics.circle("fill", x, y, 2)
+            end
+        end
+    end
+
     for _, player in entities.players() do
         love.graphics.setColor(player.colour.r, player.colour.g, player.colour.b)
 
@@ -54,6 +65,23 @@ hooks.add("draw_world", function()
                 local shape = fixture:getShape()
                 if shape:getType() == "circle" then
                     love.graphics.circle("line", x, y, shape:getRadius())
+                elseif shape:getType() == "polygon" then
+                    local verts = nil
+
+                    if player.vertices then
+                        verts = player.vertices
+                    else
+                        verts = {shape:getPoints()}
+                    end
+
+                    for k,v in pairs(verts) do
+                        if k%2==0 then
+                            verts[k] = v+y
+                        else
+                            verts[k] = v+x
+                        end
+                    end
+                    love.graphics.polygon("line", verts)
                 end
             end
                 

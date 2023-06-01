@@ -104,7 +104,7 @@ messages.subscribe("new-player", function(peer, msg)
     }
 
     local body = physics.new_body("dynamic")
-    local shape = love.physics.newCircleShape(10)
+    local shape = love.physics.newRectangleShape(15, 15)
     local fixture = love.physics.newFixture(body, shape, 5)
     -- Store the entity id in the body, so we can do collision stuff
     fixture:setUserData(id)
@@ -200,16 +200,6 @@ end)
 
 local countdown = 0
 hooks.add("update", function(dt)
-    countdown = countdown - dt
-    if countdown < 0 then
-        local player = entities.get(localplayer)
-        if player and player.body then
-            local x, y = player.body:getPosition()
-            local vx, vy = player.body:getLinearVelocity()
-        end
-        countdown = 0.1
-    end
-    
     if love.mouse.isDown(1) then
         love.mouse.setCursor(cursors.point.cursor)
     elseif love.mouse.isDown(2) then

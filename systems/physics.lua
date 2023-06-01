@@ -22,6 +22,71 @@ local function new_body(type)
     return love.physics.newBody(world, 0, 0, type)
 end
 
+local function spawnCircle(id, x, y, radius)
+    local entity = nil
+    if SERVER then
+        if not radius then return end
+
+        id, entity = entities.spawn()
+    else
+        entity = entities.get(id)
+    end
+
+    local body = physics.new_body("dynamic");
+    body:setPosition(x, y)
+
+    local shape = love.physics.newCircleShape(radius)
+    local fixture = love.physics.newFixture(body, shape, 5)
+    fixture:setUserData(id)
+
+    entity.is_circle = true
+    entity.interpolated_position = {
+        x = x,
+        y = y
+    }
+    entity.body = body
+    entity.radius = radius
+end
+
+local function spawnBox(id, x, y, width, height)
+    local entity = nil
+
+    if SERVER then            
+        if width and not height then
+            height = width
+        elseif height and not width then 
+            width = height
+        elseif not width and not height then
+            return
+        end
+
+        id, entity = entities.spawn()
+    else
+        entity = entities.get(id)
+    end
+    
+    local body = physics.new_body("dynamic");
+    body:setPosition(x, y)
+
+    local shape = love.physics.newPolygonShape(-width / 2, -height / 2, 
+                                                width / 2, -height / 2,
+                                                width / 2,  height / 2, 
+                                               -width / 2,  height / 2)
+
+    local fixture = love.physics.newFixture(body, shape, 5)
+    fixture:setUserData(id)
+
+    entity.is_box = true
+    entity.interpolated_position = {
+        x = x,
+        y = x
+    }
+    entity.body = body
+    entity.vertices = {shape:getPoints()}
+    entity.width = width
+    entity.height = height
+end
+
 local function apply_drag(dt)
     for _, entity in entities.all() do
         if entity.body then
@@ -41,6 +106,9 @@ local function interpolate_position(dt)
 
             entity.interpolated_position.x = entity.interpolated_position.x + x_distance * dt * 20.0
             entity.interpolated_position.y = entity.interpolated_position.y + y_distance * dt * 20.0
+
+            -- entity.interpolated_position.x = x
+            -- entity.interpolated_position.y = y
         end
     end
 end
@@ -73,9 +141,9 @@ hooks.add("draw_world", function()
         love.graphics.setColor({1, 1, 1})
 
         if ent.body and ent.interpolated_position then
-            --local x, y = ent.body:getPosition()
-            local x = ent.interpolated_position.x
-            local y = ent.interpolated_position.y
+            local x, y = ent.body:getPosition()
+            -- local x = ent.interpolated_position.x
+            -- local y = ent.interpolated_position.y
             
             for _, fixture in pairs(ent.body:getFixtures()) do
                 local shape = fixture:getShape()
@@ -100,5 +168,7 @@ hooks.add("draw_world", function()
 end)
 
 return {
-    new_body = new_body
+    new_body    = new_body,
+    spawnBox    = spawnBox,
+    spawnCircle = spawnCircle
 }

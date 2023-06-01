@@ -1,68 +1,26 @@
 local curtime = 0.0
 local nextupdate = 0.0
 local TICK_RATE = 1 / 60.0
+SERVER = true
+CLIENT = false
 
 entities = require("systems.server.entities")
 require("systems.server.ping")
 player_index = {} -- Maps peer:index() to player entity ids
 
-local function spawnBox(pos_x, pos_y, width, height)
-    local id, entity = entities.spawn()
-    if width and not height then
-        height = width
-    elseif height and not width then 
-        width = height
-    elseif not width and not height then
-        return
-    end
-
-    local body = physics.new_body("dynamic");
-    local shape = love.physics.newPolygonShape(-width / 2, -height / 2, 
-                                                width / 2, -height / 2,
-                                                width / 2,  height / 2, 
-                                               -width / 2,  height / 2)
-
-    local fixture = love.physics.newFixture(body, shape, 5)
-    fixture:setUserData(id)
-
-    entity.is_box = true
-    entity.interpolated_position = {
-        x = pos_x,
-        y = pos_y
-    }
-    entity.body = body
-    entity.body:setPosition(pos_x, pos_y)
-end
-
-local function spawnCircle(pos_x, pos_y, radius)
-    local id, entity = entities.spawn()
-    local body = physics.new_body("static")
-    local shape = love.physics.newCircleShape(radius)
-    local fixture = love.physics.newFixture(body, shape, 5)
-    fixture:setUserData(id)
-
-    entity.is_circle = true
-    entity.interpolated_position = {
-        x = pos_x,
-        y = pos_y
-    }
-    entity.radius = radius
-    entity.body = body
-    entity.body:setPosition(pos_x, pos_y)
-end
-
 hooks.add("load", function(args)
     love.window.close()
     network.listen();
     log.info("listening..")
-    -- create a box at 50,50
-    spawnBox(50, 50, 50, 20)
 
+    local min, max = -500, 500
     for i=1, 10 do
-        local min, max = -500, 500
-        spawnCircle(love.math.random(min, max), love.math.random(min, max), love.math.random(10, 30))
+        physics.spawnCircle(0, love.math.random(min, max), love.math.random(min, max), love.math.random(10, 30))
     end
 
+    for i=1, 5 do
+        physics.spawnBox(0, love.math.random(min, max), love.math.random(min, max), love.math.random(20, 50))
+    end
     
     -- generate world icons
     --  1<=x<= 6 : short grass
@@ -126,7 +84,7 @@ messages.subscribe("new-player", function(peer, msg)
     player_index[peer:index()] = player_id
 
     local body = physics.new_body("dynamic")
-    local shape = love.physics.newCircleShape(10)
+    local shape = love.physics.newRectangleShape(15, 15)
     local fixture = love.physics.newFixture(body, shape, 5)
     -- Store the entity id in the body, so we can do collision stuff
     fixture:setUserData(id)
@@ -159,30 +117,24 @@ messages.subscribe("new-player", function(peer, msg)
 
         if entity.is_box and entity.body then
             local x, y = entity.body:getPosition()
-            local size = 20 -- to do: send vert details to/from server 
-            -- if the box is not square shaped then this fails compeltely
-            -- not sure best way to send down variable amount of vertices
-            -- so that client can accurately construct a body/prop
+
             peer:send({
                 cmd = "spawn-box",
                 id = id,
-                pos_x = x,
-                pos_y = y,
-                size = size
+                x = x,
+                y = y,
+                width = entity.width,
+                height = entity.height
             })
         elseif entity.is_circle and entity.body then
             local x, y = entity.body:getPosition()
-            -- all of this is risky, we don't know for sure about fixtures of shape type
-            -- make this more robust later
-            local shape = entity.body:getFixtures()[1]:getShape()
-            local radius = shape:getRadius()
 
             peer:send({
                 cmd = "spawn-circle",
                 id = id,
-                pos_x = x,
-                pos_y = y,
-                radius = radius
+                x = x,
+                y = y,
+                radius = entity.radius
             })
         end
     end
@@ -249,36 +201,6 @@ messages.subscribe("update-mouse", function(peer, msg)
         y = y,
         lmb = lmb,
         rmb = rmb
-    })
-end)
-
-messages.subscribe("report-player-position", function(peer, msg)
-    -- So right now all the players communicate to the server
-    -- their position and velocity, but the server doesn't
-    -- have any serverside physics body for the player, so
-    -- no collision detection/resolution is done 
-    -- TO DO: put players' bodies into entities and run world
-    -- updates on those bodies, then send back the updated 
-    -- positions and velocities to clients
-
-    -- Remember: server is always authoritative when it comes
-    -- to physics simulation. Client can do its own thing as
-    -- a means of interpolation but when the server tells the
-    -- client where things really are they should be put in place
-
-    local entity = entities.get(tonumber(msg.id))
-    if entity and entity.body then
-        entity.body:setPosition(tonumber(msg.x), tonumber(msg.y))
-        entity.body:setLinearVelocity(tonumber(msg.vx), tonumber(msg.vy))
-    end
-
-    network.broadcast({
-        cmd = "update-body",
-        id = msg.id,
-        x = msg.x,
-        y = msg.y,
-        vx = msg.vx,
-        vy = msg.vy
     })
 end)
 
