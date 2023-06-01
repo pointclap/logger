@@ -188,9 +188,9 @@ end
 ---@class ColourSelector: function(entity: Entity): number[4]
 
 ---@class Selectors @table of functions for deriving attributes of the part from its associated entity
----@field animation AnimationSelector?
----@field direction DirectionSelector?
----@field colour ColourSelector?
+---@field animation function(entity: Entity): string
+---@field direction function(entity: Entity): Direction
+---@field colour function(entity: Entity): number[4]
 
 ---@class Quad @from `love.graphics.newQuad`
 
