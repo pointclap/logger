@@ -235,38 +235,29 @@ hooks.add("update", function(dt)
     end
 end)
 
-hooks.add("draw_local", function()
-    local player = entities.get(localplayer)
-    if not player or not player.interpolated_position then
-        return
-    end
-
-    local x = player.interpolated_position.x
-    local y = player.interpolated_position.y
-
+hooks.add("draw_world", function()
     for id, player in entities.players() do
         love.graphics.setColor(player.colour.r, player.colour.g, player.colour.b)
+
         if player.mouse then
-            local mouseX = player.mouse.x
-            local mouseY = player.mouse.y
+            local image = cursors.open.image
+            local quad = cursors.open.quad
 
-            if id ~= localplayer and player.interpolated_position then
-                mouseX = mouseX + player.interpolated_position.x - x
-                mouseY = mouseY + player.interpolated_position.y - y
-                    
-                -- offset the quad so the index finger lines up with actual cursor point
-                mouseX = mouseX - 15
-                mouseY = mouseY - 0
+            if player.mouse.lmb then
+                image = cursors.point.image
+                quad = cursors.point.quad
+            elseif player.mouse.rmb then
+                image = cursors.closed.image
+                quad = cursors.closed.quad
+            end
 
-                --love.graphics.circle("fill", mouseX, mouseY, 3)
-                if player.mouse.lmb == 1 then
-                    love.graphics.draw(cursors.point.image,  cursors.point.quad,   mouseX, mouseY)
-                elseif player.mouse.rmb == 1 then
-                    love.graphics.draw(cursors.closed.image, cursors.closed.quad, mouseX, mouseY)
-                else
-                    love.graphics.draw(cursors.open.image,   cursors.open.quad,   mouseX, mouseY)
-                end
+            if img and quad then
+                love.graphics.draw(image, quad, player.mouse.x, player.mouse.y)
             end
         end
     end
+end)
+
+hooks.add("draw_local", function()
+    
 end)
