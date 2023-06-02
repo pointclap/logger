@@ -117,6 +117,41 @@ local function interpolate_position(dt)
 end
 
 hooks.add("fixed_timestep", function(fixed_timestep)
+    -- iterate over players and move their selected entities if necessary
+    dragging_entities = {}
+
+    for _, player in entities.players() do
+        if player.body then
+            local ent_id = player.selected_entity.id
+            local selected_entity = entities.get(ent_id)
+            local force_x, force_y = 0, 0
+            
+            if selected_entity and ent_id and player.mouse.rmb == 1 then
+                local body_x, body_y = selected_entity.body:getWorldPoint(player.selected_entity.x, player.selected_entity.y)
+
+                force_x = (player.mouse.x - body_x) * 1000 * fixed_timestep
+                force_y = (player.mouse.y - body_y) * 1000 * fixed_timestep
+                    
+                if not dragging_entities[ent_id] then
+                    dragging_entities[ent_id] = {
+                        entity = selected_entity,
+                        x = 0,
+                        y = 0
+                    }
+                end
+
+                dragging_entities[ent_id].x = dragging_entities[ent_id].x + force_x
+                dragging_entities[ent_id].y = dragging_entities[ent_id].y + force_y
+            end
+        end
+    end
+
+    for id, target in pairs(dragging_entities) do
+        if target.entity.body then
+            target.entity.body:applyForce(target.x, target.y)
+        end
+    end
+
     world:update(fixed_timestep, velocity_iterations, position_iterations)
     apply_drag(fixed_timestep)
     interpolate_position(fixed_timestep)
@@ -141,10 +176,10 @@ messages.subscribe("update-body", function(peer, msg)
 end)
 
 hooks.add("draw_world", function()
-    local selected_entity_id = nil
-    local selected_x, selected_y = 0, 0
-
     for ent_id, ent in entities.all() do
+        local selected_entity_id = nil
+        local selected_x, selected_y = 0, 0
+    
         if localplayer then
             local player = entities.get(localplayer)
             if player then
@@ -180,11 +215,19 @@ hooks.add("draw_world", function()
                     love.graphics.circle("line", x, y, ent.radius)
                 end
             end
+        end
+    end
 
-            -- draw a little dot where a player has the body selected)
-            if selected_entity_id then
-                local point_x, point_y = ent.body:getWorldPoint(selected_x, selected_y)
+    -- draw the selection point and line to players cursor
+    -- i think what would be cool is to cache all the shapes somewhere
+    -- and designated Z layer so that im not just piling shit on willy nilly
+    for ply_id, ply in entities.players() do
+        if ply and ply.selected_entity and ply.selected_entity.id then
+            local ent = entities.get(ply.selected_entity.id)
+            if ent then
+                local point_x, point_y = ent.body:getWorldPoint(ply.selected_entity.x, ply.selected_entity.y)
                 love.graphics.circle("fill", point_x, point_y, 2)
+                love.graphics.line(point_x, point_y, ply.mouse.x, ply.mouse.y)
             end
         end
     end
