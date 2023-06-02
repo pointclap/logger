@@ -55,7 +55,7 @@ messages.subscribe("spawn-box", function(peer, msg)
     local width = tonumber(msg.width)
     local height = tonumber(msg.height)
 
-    physics.spawnBox(id, x, y, width, height)
+    physics.spawn_box(id, x, y, width, height)
 end)
 
 messages.subscribe("spawn-circle", function(peer, msg)
@@ -63,7 +63,7 @@ messages.subscribe("spawn-circle", function(peer, msg)
     local x, y = tonumber(msg.x), tonumber(msg.y)
     local radius = tonumber(msg.radius)
 
-    physics.spawnCircle(id, x, y, radius)
+    physics.spawn_circle(id, x, y, radius)
 end)
 
 messages.subscribe("update-tile", function(peer, msg)

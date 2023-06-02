@@ -15,11 +15,11 @@ hooks.add("load", function(args)
 
     local min, max = -500, 500
     for i=1, 10 do
-        physics.spawnCircle(0, love.math.random(min, max), love.math.random(min, max), love.math.random(10, 30))
+        physics.spawn_circle(0, love.math.random(min, max), love.math.random(min, max), love.math.random(10, 30))
     end
 
     for i=1, 5 do
-        physics.spawnBox(0, love.math.random(min, max), love.math.random(min, max), love.math.random(20, 50))
+        physics.spawn_box(0, love.math.random(min, max), love.math.random(min, max), love.math.random(20, 50))
     end
     
     -- generate world icons

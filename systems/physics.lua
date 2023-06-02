@@ -22,7 +22,7 @@ local function new_body(type)
     return love.physics.newBody(world, 0, 0, type)
 end
 
-local function spawnCircle(id, x, y, radius)
+local function spawn_circle(id, x, y, radius)
     local entity = nil
     if SERVER then
         if not radius then return end
@@ -48,7 +48,7 @@ local function spawnCircle(id, x, y, radius)
     entity.radius = radius
 end
 
-local function spawnBox(id, x, y, width, height)
+local function spawn_box(id, x, y, width, height)
     local entity = nil
 
     if SERVER then            
@@ -116,7 +116,7 @@ local function interpolate_position(dt)
     end
 end
 
-hooks.add("fixed_timestep", function(fixed_timestep)
+local function handle_dragged_entities(dt)
     -- iterate over players and move their selected entities if necessary
     dragging_entities = {}
 
@@ -129,8 +129,8 @@ hooks.add("fixed_timestep", function(fixed_timestep)
             if selected_entity and ent_id and player.mouse.rmb == 1 then
                 local body_x, body_y = selected_entity.body:getWorldPoint(player.selected_entity.x, player.selected_entity.y)
 
-                force_x = (player.mouse.x - body_x) * 1000 * fixed_timestep
-                force_y = (player.mouse.y - body_y) * 1000 * fixed_timestep
+                force_x = (player.mouse.x - body_x) * 1000 * dt
+                force_y = (player.mouse.y - body_y) * 1000 * dt
                     
                 if not dragging_entities[ent_id] then
                     dragging_entities[ent_id] = {
@@ -151,7 +151,18 @@ hooks.add("fixed_timestep", function(fixed_timestep)
             target.entity.body:applyForce(target.x, target.y)
         end
     end
+end
 
+hooks.add("fixed_timestep", function(fixed_timestep)
+    -- players should always face 1 direction
+    for _, player in entities.players() do
+        if player.body then
+            player.body:setAngle(0)
+            player.body:setAngularVelocity(0)
+        end
+    end
+
+    handle_dragged_entities(fixed_timestep)
     world:update(fixed_timestep, velocity_iterations, position_iterations)
     apply_drag(fixed_timestep)
     interpolate_position(fixed_timestep)
@@ -235,6 +246,6 @@ end)
 
 return {
     new_body    = new_body,
-    spawnBox    = spawnBox,
-    spawnCircle = spawnCircle
+    spawn_box    = spawn_box,
+    spawn_circle = spawn_circle
 }
