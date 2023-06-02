@@ -237,22 +237,25 @@ end)
 
 hooks.add("draw_world", function()
     for id, player in entities.players() do
-        love.graphics.setColor(player.colour.r, player.colour.g, player.colour.b)
+        if id ~= localplayer then
+            love.graphics.setColor(player.colour.r, player.colour.g, player.colour.b)
 
-        if player.mouse then
             local image = cursors.open.image
             local quad = cursors.open.quad
 
-            if player.mouse.lmb then
+            if player.mouse.lmb == 1 then
                 image = cursors.point.image
                 quad = cursors.point.quad
-            elseif player.mouse.rmb then
+            elseif player.mouse.rmb == 1 then
                 image = cursors.closed.image
                 quad = cursors.closed.quad
             end
 
-            if img and quad then
-                love.graphics.draw(image, quad, player.mouse.x, player.mouse.y)
+            local x = player.mouse.x - cursors.hotpoint_x
+            local y = player.mouse.y - cursors.hotpoint_y
+
+            if image and quad then
+                love.graphics.draw(image, quad, x, y)
             end
         end
     end

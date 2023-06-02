@@ -16,6 +16,9 @@ local right_point_imagedata  = love.image.newImageData(right_point_path);
 local right_closed_imagedata = love.image.newImageData(right_closed_path);
 
 local cursors = {
+    hotpoint_x = hotpoint_x,
+    hotpoint_y = hotpoint_y,
+    
     open   = {
         image  = right_open_image,
         quad   = love.graphics.newQuad(0, 0, 32, 32, right_open_image),

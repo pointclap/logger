@@ -16,29 +16,9 @@ hooks.add("update",  function(dt)
     end
 end)
 
-hooks.add("draw_local", function()
-    if not debug_mode then return end
+hooks.add("draw_local", function()    
     love.graphics.setColor(0.8, 0.8, 0.8, 1.0)
     love.graphics.draw(framerate, 20, 20)
-    
-    for _, player in entities.players() do   
-        love.graphics.setColor(player.colour.r, player.colour.g, player.colour.b)
-
-        if player.mouse.x and player.mouse.y then
-            local x = player.mouse.x
-            local y = player.mouse.y
-
-            if id ~= localplayer and player.interpolated_position then
-                x = mouse.x + player.interpolated_position.x - player.interpolated_position.x
-                y = mouse.y + player.interpolated_zposition.y - player.interpolated_position.y
-            end
-
-            mouse_text:set("mouse.x: " .. player.mouse.x)
-            love.graphics.draw(mouse_text, x, y + 10)
-            mouse_text:set("mouse.y: " .. player.mouse.y)
-            love.graphics.draw(mouse_text, x, y + 20)
-        end
-    end
 end)
 
 hooks.add("draw_world", function()
@@ -91,6 +71,22 @@ hooks.add("draw_world", function()
             mouse_text:set("int y: " .. player.interpolated_position.y)
             love.graphics.draw(mouse_text, player.interpolated_position.x, player.interpolated_position.y + 40)
             love.graphics.pop()
+        end
+    end
+    
+    love.graphics.setColor(0, 0, 0, 1)
+    
+    for _, player in entities.players() do   
+        --love.graphics.setColor(player.colour.r, player.colour.g, player.colour.b)
+
+        if player.mouse.x and player.mouse.y then
+            local x = player.mouse.x
+            local y = player.mouse.y
+            
+            mouse_text:set("mouse.x: " .. x)
+            love.graphics.draw(mouse_text, x, y + 10)
+            mouse_text:set("mouse.y: " .. y)
+            love.graphics.draw(mouse_text, x, y + 20)
         end
     end
 end)
