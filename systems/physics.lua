@@ -92,6 +92,9 @@ local function apply_drag(dt)
         if entity.body then
             local x, y = entity.body:getLinearVelocity()
             entity.body:applyForce(-x * drag_coefficient, -y * drag_coefficient)
+
+            local w = entity.body:getAngularVelocity()
+            entity.body:applyTorque(-w * drag_coefficient)
         end
     end
 end
@@ -129,6 +132,7 @@ messages.subscribe("update-body", function(peer, msg)
     if entity.body then
         entity.body:setPosition(tonumber(msg.x), tonumber(msg.y))
         entity.body:setLinearVelocity(tonumber(msg.vx), tonumber(msg.vy))
+        entity.body:setAngle(tonumber(msg.a))
 
         if entity.player then
             entity.body.applyForce(tonumber(msg.ax), tonumber(msg.ay))
@@ -148,15 +152,8 @@ hooks.add("draw_world", function()
             for _, fixture in pairs(ent.body:getFixtures()) do
                 local shape = fixture:getShape()
                 
-                if shape:getType() == "polygon" and ent.vertices then
-                    local verts = {}
-                    for k, v in pairs(ent.vertices) do
-                        if k%2 == 0 then
-                            verts[k] = v+y
-                        else
-                            verts[k] = v+x
-                        end
-                    end
+                if shape:getType() == "polygon" then
+                    local verts = {ent.body:getWorldPoints(shape:getPoints())}
 
                     love.graphics.polygon("line", verts)
                 elseif shape:getType() == "circle" and ent.radius then

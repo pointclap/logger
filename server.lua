@@ -235,6 +235,7 @@ hooks.add("fixed_timestep", function(fixed_timestep)
     for id, ent in entities.all() do
         if ent.body then
             local x, y = ent.body:getPosition()
+            local a = ent.body:getAngle()
             local vx, vy = ent.body:getLinearVelocity()
             local ax, ay = 0, 0
 
@@ -248,6 +249,7 @@ hooks.add("fixed_timestep", function(fixed_timestep)
                 id = id,
                 x = x,
                 y = y,
+                a = a,
                 vx = vx,
                 vy = vy,
                 ax = ax,
