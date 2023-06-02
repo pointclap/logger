@@ -4,6 +4,7 @@ messages = require("messages")
 network = require("network")
 physics = require("systems.physics")
 util = require("util")
+world = nil
 
 function love.load(args)
     if not args[1] then
@@ -13,6 +14,8 @@ function love.load(args)
         log.debug("starting client")
         require("client")
     end
+
+    world = require("systems.world")
 
     hooks.call("load", args)
 end

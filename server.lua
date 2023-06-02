@@ -8,8 +8,14 @@ entities = require("systems.server.entities")
 require("systems.server.ping")
 player_index = {} -- Maps peer:index() to player entity ids
 
+local function init_world()
+    -- generate a grid of tiles and stitch them together
+end
+
 hooks.add("load", function(args)
     love.window.close()
+    world.init()
+    
     network.listen();
     log.info("listening..")
 
@@ -20,31 +26,6 @@ hooks.add("load", function(args)
 
     for i=1, 5 do
         physics.spawn_box(0, love.math.random(min, max), love.math.random(min, max), love.math.random(20, 50), love.math.random(10, 70))
-    end
-    
-    -- generate world icons
-    --  1<=x<= 6 : short grass
-    --  7<=x<= 9 : long grass
-    --     x =10 : flowers
-
-    for i = -20, 20 do
-        for k = -20, 20 do
-            local newtile = {}
-            newtile.position = {
-                x = k * 16,
-                y = i * 16
-            }
-            local n = math.random(1, 10)
-            if n == 10 then
-                newtile.type = "flowers"
-            elseif n >= 7 and n <= 9 then
-                newtile.type = "longgrass"
-            else
-                newtile.type = "shortgrass"
-            end
-
-            table.insert(tiles, newtile)
-        end
     end
 end)
 
@@ -110,23 +91,27 @@ messages.subscribe("new-player", function(peer, msg)
         id = player_id
     })
 
+    -- send server world tiles
+    if not world.tiles then
+        log.error("wtf????")
+    end
+    
+    for k, tile in pairs(world.tiles) do
+        peer:send({
+            cmd = "update-tile",
+            id = k,
+            x = tile.position.x,
+            y = tile.position.y,
+            type = tile.type
+        })
+    end
+
     -- Tell new player about all entities and their positions
     for id, entity in entities.all() do
         peer:send({
             cmd = "entity-spawned",
             id = id
         });
-
-        -- send server world tiles
-        for k, tile in pairs(tiles) do
-            peer:send({
-                cmd = "update-tile",
-                id = k,
-                x = tile.position.x,
-                y = tile.position.y,
-                type = tile.type
-            })
-        end
 
         if entity.is_box and entity.body then
             local x, y = entity.body:getPosition()

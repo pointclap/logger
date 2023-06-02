@@ -1,5 +1,4 @@
 local world = nil
-tiles = {}
 local velocity_iterations = 8
 local position_iterations = 3
 local drag_coefficient = 5
@@ -124,13 +123,19 @@ local function handle_dragged_entities(dt)
             local force_x, force_y = 0, 0
             
             if selected_entity and ent_id and player.mouse.rmb == 1 then
-                local body_x, body_y = selected_entity.body:getWorldPoint(player.selected_entity.x, player.selected_entity.y)
+                local selected_body = selected_entity.body
+                local body_x, body_y = selected_body:getWorldPoint(player.selected_entity.x, player.selected_entity.y)
 
                 force_x = (player.mouse.x - body_x) * 1000 * dt
                 force_y = (player.mouse.y - body_y) * 1000 * dt
                 
                 if force_x ~= 0 or force_y ~= 0 then
-                    selected_entity.body:applyForce(force_x, force_y, body_x, body_y)
+                    selected_body:applyForce(force_x, force_y, body_x, body_y)
+
+                    -- allow player to resist rotation
+                    if util.distance(player.mouse.x, player.mouse.y, body_x, body_y) < 3 then
+                        selected_body:applyTorque(selected_body:getAngularVelocity() * 20)
+                    end
                 end
             end
         end

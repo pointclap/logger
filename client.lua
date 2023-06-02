@@ -24,6 +24,7 @@ tick_rate = 1 / 10
 hooks.add("load", function(args)
     username = args[2]
     network.connect(args[1]);
+    world.init()
 
     love.graphics.setDefaultFilter("nearest", "nearest", 0)
 end)
@@ -42,6 +43,7 @@ hooks.add("draw", function()
         love.graphics.push()
         love.graphics.translate(-player.interpolated_position.x + SCRWIDTH / 2,
             -player.interpolated_position.y + SCRHEIGHT / 2)
+        world.draw()
         hooks.call("draw_world")
         love.graphics.pop()
     end
@@ -64,15 +66,4 @@ messages.subscribe("spawn-circle", function(peer, msg)
     local radius = tonumber(msg.radius)
 
     physics.spawn_circle(id, x, y, radius)
-end)
-
-messages.subscribe("update-tile", function(peer, msg)
-    local id = tonumber(msg.id)
-    local newtile = {}
-    newtile.position = {
-        x = tonumber(msg.x),
-        y = tonumber(msg.y)
-    }
-    newtile.type = msg.type
-    tiles[id] = newtile
 end)

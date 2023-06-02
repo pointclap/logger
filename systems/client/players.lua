@@ -142,7 +142,6 @@ messages.subscribe("update-selected-entity", function(peer, msg)
 
     if player then
         if msg.entity_id then
-            log.debug("updating selected entity, " .. msg.entity_id .." for player " .. player_id)
             player.selected_entity.id = tonumber(msg.entity_id)
             player.selected_entity.x  = tonumber(msg.x)
             player.selected_entity.y  = tonumber(msg.y)
