@@ -117,9 +117,6 @@ local function interpolate_position(dt)
 end
 
 local function handle_dragged_entities(dt)
-    -- iterate over players and move their selected entities if necessary
-    dragging_entities = {}
-
     for _, player in entities.players() do
         if player.body then
             local ent_id = player.selected_entity.id
@@ -131,24 +128,11 @@ local function handle_dragged_entities(dt)
 
                 force_x = (player.mouse.x - body_x) * 1000 * dt
                 force_y = (player.mouse.y - body_y) * 1000 * dt
-                    
-                if not dragging_entities[ent_id] then
-                    dragging_entities[ent_id] = {
-                        entity = selected_entity,
-                        x = 0,
-                        y = 0
-                    }
+                
+                if force_x ~= 0 or force_y ~= 0 then
+                    selected_entity.body:applyForce(force_x, force_y, body_x, body_y)
                 end
-
-                dragging_entities[ent_id].x = dragging_entities[ent_id].x + force_x
-                dragging_entities[ent_id].y = dragging_entities[ent_id].y + force_y
             end
-        end
-    end
-
-    for id, target in pairs(dragging_entities) do
-        if target.entity.body then
-            target.entity.body:applyForce(target.x, target.y)
         end
     end
 end
