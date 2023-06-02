@@ -103,6 +103,12 @@ messages.subscribe("new-player", function(peer, msg)
         drmb = 0
     }
 
+    player.selected_entity = {
+        id = nil,
+        x = 0,
+        y = 0
+    }
+    
     local body = physics.new_body("dynamic")
     local shape = love.physics.newRectangleShape(15, 15)
     local fixture = love.physics.newFixture(body, shape, 5)
@@ -127,6 +133,22 @@ messages.subscribe("update-mouse", function(peer, msg)
         player.mouse.y = tonumber(msg.y)
         player.mouse.lmb = tonumber(msg.lmb)
         player.mouse.rmb = tonumber(msg.rmb)
+    end
+end)
+
+messages.subscribe("update-selected-entity", function(peer, msg)
+    local player_id = tonumber(msg.player_id)
+    local player = entities.get(player_id)
+
+    if player then
+        if msg.entity_id then
+            log.debug("updating selected entity, " .. msg.entity_id .." for player " .. player_id)
+            player.selected_entity.id = tonumber(msg.entity_id)
+            player.selected_entity.x  = tonumber(msg.x)
+            player.selected_entity.y  = tonumber(msg.y)
+        else
+            player.selected_entity.id = nil
+        end
     end
 end)
 
@@ -165,12 +187,16 @@ hooks.add("fixed_timestep", function(fixed_timestep)
                 })
             end
 
+            local body_x, body_y = player.body:getPosition()
+
             player.mouse.dx = player.mouse.x
             player.mouse.dy = player.mouse.y
             player.mouse.dlmb = player.mouse.lmb
-            player.mouse.drmb = player.mouse.drmb
+            player.mouse.drmb = player.mouse.rmb
 
             player.mouse.x, player.mouse.y = love.mouse:getPosition()
+            player.mouse.x = body_x + player.mouse.x - SCRWIDTH / 2
+            player.mouse.y = body_y + player.mouse.y - SCRHEIGHT / 2
             
             if love.mouse.isDown(1) then
                 player.mouse.lmb = 1

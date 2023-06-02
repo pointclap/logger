@@ -75,12 +75,25 @@ messages.subscribe("new-player", function(peer, msg)
         x  = 0,
         y  = 0
     }
+
     player.mouse = {
         x = 0,
         y = 0,
-        lmb = false,
-        rmb = false
+        dx = 0,
+        dy = 0,
+
+        lmb = 0,
+        rmb = 0,
+        dlmb = 0,
+        drmb = 0
     }
+
+    player.selected_entity = {
+        id = nil,
+        x = 0,
+        y = 0
+    }
+
     player_index[peer:index()] = player_id
 
     local body = physics.new_body("dynamic")
@@ -168,7 +181,6 @@ messages.subscribe("player-move", function(peer, msg)
         player.move.x = x
         player.move.y = y
     else
-        log.error("player-move called but no player!!")
         return
     end
 end)
@@ -180,14 +192,62 @@ messages.subscribe("update-mouse", function(peer, msg)
     local y = tonumber(msg.y)
     local lmb = tonumber(msg.lmb)
     local rmb = tonumber(msg.rmb)
-
+    
     if player then
+        player.mouse.dx = player.mouse.x
+        player.mouse.dy = player.mouse.y
         player.mouse.x = x
         player.mouse.y = y
+
+        player.mouse.dlmb = player.mouse.lmb
+        player.mouse.drmb = player.mouse.rmb
         player.mouse.lmb = lmb
         player.mouse.rmb = rmb
+
+        -- only search for entities if they just pressed a button
+        local broadcast = false
+
+        if player.mouse.lmb == 0 and player.mouse.rmb == 0 then
+            if player.selected_entity.id then
+                broadcast = true
+            end
+
+            player.selected_entity.id = nil
+        elseif (player.mouse.lmb > 0 and player.mouse.dlmb == 0) or
+               (player.mouse.rmb > 0 and player.mouse.drmb == 0) then
+            player.selected_entity.id = nil
+
+            -- check if mouse is hovering over any entities
+            for id, ent in entities.all() do
+                if player.selected_entity.id then break end
+
+                if ent.body then
+                    local body_x, body_y = ent.body:getPosition()
+                    local body_a = ent.body:getAngle()
+
+                    for _, fixture in pairs(ent.body:getFixtures()) do
+                        local shape = fixture:getShape()
+                        if shape:testPoint(body_x, body_y, body_a, x, y) then
+                            player.selected_entity.id = id
+                            player.selected_entity.x, player.selected_entity.y = ent.body:getLocalPoint(x, y)
+                            broadcast = true
+                            break
+                        end
+                    end
+                end
+            end
+        end
+
+        if broadcast then
+            network.broadcast({
+                cmd = "update-selected-entity",
+                player_id = player_id,
+                entity_id = player.selected_entity.id,
+                x = player.selected_entity.x,
+                y = player.selected_entity.y
+            })
+        end
     else
-        log.error("update-mouse called but no player!!")
         return
     end
     

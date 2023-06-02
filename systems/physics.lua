@@ -141,8 +141,28 @@ messages.subscribe("update-body", function(peer, msg)
 end)
 
 hooks.add("draw_world", function()
+    local selected_entity_id = nil
+    local selected_x, selected_y = 0, 0
+
     for ent_id, ent in entities.all() do
-        love.graphics.setColor({1, 1, 1})
+        if localplayer then
+            local player = entities.get(localplayer)
+            if player then
+                if player.selected_entity.id then
+                    if player.selected_entity.id == ent_id then
+                        selected_entity_id = ent_id
+                        selected_x = player.selected_entity.x
+                        selected_y = player.selected_entity.y
+                    end
+                end
+            end
+        end
+
+        if selected_entity_id then
+            love.graphics.setColor({1, 0, 0})
+        else
+            love.graphics.setColor({1, 1, 1})
+        end
 
         if ent.body and ent.interpolated_position then
             local x, y = ent.body:getPosition()
@@ -159,6 +179,12 @@ hooks.add("draw_world", function()
                 elseif shape:getType() == "circle" and ent.radius then
                     love.graphics.circle("line", x, y, ent.radius)
                 end
+            end
+
+            -- draw a little dot where a player has the body selected)
+            if selected_entity_id then
+                local point_x, point_y = ent.body:getWorldPoint(selected_x, selected_y)
+                love.graphics.circle("fill", point_x, point_y, 2)
             end
         end
     end

@@ -1,6 +1,8 @@
 SERVER = false
 CLIENT = true
 
+SCRWIDTH, SCRHEIGHT = love.graphics.getDimensions()
+
 hooks.add("uncaught-message", function(peer, msg)
     network.broadcast(msg)
 end)
@@ -35,12 +37,11 @@ end)
 hooks.add("draw", function()
     hooks.call("draw_local_pre")
 
-    local width, height = love.graphics.getDimensions()
     local player = entities.get(localplayer)
     if player and player.interpolated_position then
         love.graphics.push()
-        love.graphics.translate(-player.interpolated_position.x + width / 2,
-            -player.interpolated_position.y + height / 2)
+        love.graphics.translate(-player.interpolated_position.x + SCRWIDTH / 2,
+            -player.interpolated_position.y + SCRHEIGHT / 2)
         hooks.call("draw_world")
         love.graphics.pop()
     end
