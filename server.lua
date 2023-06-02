@@ -19,7 +19,7 @@ hooks.add("load", function(args)
     end
 
     for i=1, 5 do
-        physics.spawn_box(0, love.math.random(min, max), love.math.random(min, max), love.math.random(20, 50))
+        physics.spawn_box(0, love.math.random(min, max), love.math.random(min, max), love.math.random(20, 50), love.math.random(10, 70))
     end
     
     -- generate world icons
