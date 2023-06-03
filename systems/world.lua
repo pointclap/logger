@@ -63,6 +63,7 @@ messages.subscribe("update-tile", function(peer, msg)
     local x, y, w, h = quad:getViewport()
 
     love.graphics.setCanvas(canvas)
+    print("pos: (" .. newtile.position.x .. ", " .. newtile.position.y .. ")")
     love.graphics.draw(tile_templates.image, quad, newtile.position.x - w / 2, newtile.position.y - h / 2)
     love.graphics.setCanvas()
 end)
@@ -72,7 +73,7 @@ local function draw()
 
     local width, height = canvas:getDimensions()
     love.graphics.draw(tile_templates.image, tile_templates.tiles["coin"], 0, 0)
-    love.graphics.draw(canvas, -width/2, -height/2)
+    love.graphics.draw(canvas, -width / 2, -height / 2)
 end
 
 return {

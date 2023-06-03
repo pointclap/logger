@@ -1,7 +1,7 @@
 local world = nil
 local velocity_iterations = 8
 local position_iterations = 3
-local drag_coefficient = 5
+local drag_coefficient = 10
 
 local function collision_callback(a, b, contact)
     local a, b = a:getUserData(), b:getUserData()
@@ -93,7 +93,7 @@ local function apply_drag(dt)
             entity.body:applyForce(-x * drag_coefficient, -y * drag_coefficient)
 
             local w = entity.body:getAngularVelocity()
-            entity.body:applyTorque(-w * drag_coefficient)
+            entity.body:applyTorque(-w * drag_coefficient * 500)
         end
     end
 end
@@ -108,9 +108,6 @@ local function interpolate_position(dt)
 
             entity.interpolated_position.x = entity.interpolated_position.x + x_distance * dt * 20.0
             entity.interpolated_position.y = entity.interpolated_position.y + y_distance * dt * 20.0
-
-            -- entity.interpolated_position.x = x
-            -- entity.interpolated_position.y = y
         end
     end
 end
@@ -134,7 +131,8 @@ local function handle_dragged_entities(dt)
 
                     -- allow player to resist rotation
                     if util.distance(player.mouse.x, player.mouse.y, body_x, body_y) < 3 then
-                        selected_body:applyTorque(selected_body:getAngularVelocity() * 20)
+                        local w = selected_body:getAngularVelocity()
+                        selected_body:applyTorque(-w * drag_coefficient * 1000)
                     end
                 end
             end
